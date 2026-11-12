@@ -1594,6 +1594,41 @@ resolveAfterfallSpawns();
  enforce();
 })();
 </script>
+<style id="v47-auth-style">
+#afAuthGate{position:fixed;inset:0;z-index:2147483647;background:rgba(4,9,14,.97);display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
+#afAuthGate.af-hidden{display:none!important}
+#afAuthCard{width:min(420px,100%);padding:27px;background:#14232d;border:1px solid #52616b;border-radius:16px;box-shadow:0 20px 70px #000b;color:#ecf0ed;font-family:'DM Sans',sans-serif}
+#afAuthCard h2{font:800 32px 'Barlow Condensed',sans-serif;margin:4px 0 12px;letter-spacing:1px}
+#afAuthCard input{display:block;width:100%;margin:10px 0;background:#0b1922;border:1px solid #52616b;border-radius:8px;padding:12px;color:white}
+#afAuthCard button{padding:11px 13px;margin:6px 5px 4px 0;border:1px solid #596b72;border-radius:8px;background:#d7b47b;color:#15212b;font-weight:800;cursor:pointer}
+#afAuthCard button.secondary{background:#233641;color:#e7eeeb}
+#afAuthCard p{line-height:1.6;color:#a9bbc2;font-size:12px}
+#afAuthMessage{min-height:35px;color:#e4c18a!important;white-space:pre-wrap}
+#afAuthBadge{position:fixed;bottom:12px;right:12px;z-index:10050;background:#172c36;color:#e2e8e8;border:1px solid #4e6470;border-radius:9px;padding:8px;font-size:11px;max-width:260px}
+#afAuthBadge button{background:transparent;color:#e2c18e;border:0;cursor:pointer;margin-left:7px}
+</style>
+<div id="afAuthGate"><div id="afAuthCard"><div class="sub">AFTERFALL · ONLINE ACCOUNT</div><h2>ENTER THE AFTERFALL</h2><p>Sign in to your account before entering the game. Each player needs their own verified email address.</p><input id="afAuthEmail" type="email" autocomplete="email" placeholder="Email address" aria-label="Email address"><input id="afAuthPassword" type="password" autocomplete="current-password" placeholder="Password (at least 6 characters)" aria-label="Password"><button id="afSignIn" type="button">LOG IN</button><button id="afSignUp" class="secondary" type="button">CREATE ACCOUNT</button><button id="afForgot" class="secondary" type="button">RESET PASSWORD</button><p id="afAuthMessage" role="status">Connecting securely…</p><p style="border-top:1px solid #344a54;padding-top:13px">ONLINE LOGIN PREVIEW: This version authenticates accounts, but character claims, surveys, story, and deaths still save in this browser only. Do not treat it as synchronized multiplayer yet.</p></div></div>
+<div id="afAuthBadge" style="display:none"><span id="afAccountName"></span><button id="afLogOut" type="button">Log out</button></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script id="v47-auth">
+(()=>{
+'use strict';
+const URL='https://wltiqzvlveahfvovzxqw.supabase.co';
+const KEY='sb_publishable_3DTN7FZSToI_OWjFO8SFYQ_LD47u2nP';
+const gate=document.getElementById('afAuthGate'),message=document.getElementById('afAuthMessage'),badge=document.getElementById('afAuthBadge');
+let client=null;
+function msg(t){message.textContent=t}
+function show(user){if(user){gate.classList.add('af-hidden');badge.style.display='block';document.getElementById('afAccountName').textContent=user.email||'Signed in'}else{gate.classList.remove('af-hidden');badge.style.display='none'}}
+if(!window.supabase||!window.supabase.createClient){msg('Could not load the authentication library. Check your internet connection and refresh.');return}
+try{client=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(e){msg('Connection configuration error: '+e.message);return}
+window.afterfallSupabase=client;
+client.auth.onAuthStateChange((_event,session)=>{show(session?.user||null);if(session?.user)msg('Signed in.')});
+client.auth.getSession().then(({data,error})=>{if(error){show(null);msg(error.message)}else{show(data.session?.user||null);if(!data.session)msg('Log in or create an account to continue.')}}).catch(e=>msg('Unable to check session: '+e.message));
+function credentials(){const email=document.getElementById('afAuthEmail').value.trim(),password=document.getElementById('afAuthPassword').value;if(!email||!password)throw Error('Enter your email and password.');return{email,password}}
+async function run(kind){try{msg('Please wait…');let result;if(kind==='in'){result=await client.auth.signInWithPassword(credentials())}else if(kind==='up'){result=await client.auth.signUp({...credentials(),options:{emailRedirectTo:location.origin+location.pathname}})}else{const email=document.getElementById('afAuthEmail').value.trim();if(!email)throw Error('Enter your email first.');result=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname})}if(result.error)throw result.error;if(kind==='up')msg(result.data.session?'Account created. You are signed in.':'Check your email for the confirmation link, then return to log in.');else if(kind==='reset')msg('If the email exists, a password reset link has been sent.');else msg('Signed in.')}catch(e){msg(e.message||String(e))}}
+document.getElementById('afSignIn').onclick=()=>run('in');document.getElementById('afSignUp').onclick=()=>run('up');document.getElementById('afForgot').onclick=()=>run('reset');document.getElementById('afLogOut').onclick=async()=>{const {error}=await client.auth.signOut();if(error)alert(error.message);else show(null)};
+})();
+</script>
 </body></html>
 
 <!-- v23: Curtis begins at an approximate location on Staten Island, NY; no street address supplied. -->
