@@ -1770,8 +1770,23 @@ body.af-live-ready .chronicle-explainer{display:none}
 const $=id=>document.getElementById(id), c=()=>window.afterfallSupabase;
 const panel=document.createElement('section');panel.id='afLiveOriginal';panel.innerHTML='<div class="sub">AFTERFALL · SHARED WORLD · MULTIPLAYER V52</div><h3 id="afLiveTitle">CONNECTING TO THE WORLD</h3><p id="afLiveMessage">Checking your survivor…</p><div id="afLiveChoices"></div><div class="af-journal" id="afLiveJournal"></div>';
 const stats=document.createElement('p');stats.id='afV52Survival';stats.style.cssText='font-size:12px;color:#e1c89c;margin:9px 0 12px;letter-spacing:.03em';panel.insertBefore(stats,document.getElementById('afLiveChoices'));const story=document.querySelector('.story');story.insertBefore(panel,story.firstChild);
-let userId=null, name='', turn=null, chosen='hold', pending=false, lastTurn=null, lastLocation='', mapOk=false, privateMap=null;
-const destinations=[['Newark, New Jersey',40.7357,-74.1724],['Philadelphia, Pennsylvania',39.9526,-75.1636],['Albany, New York',42.6526,-73.7562],['Boston, Massachusetts',42.3601,-71.0589],['Washington, DC',38.9072,-77.0369],['Pittsburgh, Pennsylvania',40.4406,-79.9959],['Chicago, Illinois',41.8781,-87.6298],['Atlanta, Georgia',33.749,-84.388],['Miami, Florida',25.7617,-80.1918],['Los Angeles, California',34.0522,-118.2437],['Toronto, Canada',43.6532,-79.3832]];
+let userId=null, name='', turn=null, chosen=null, pending=false, lastTurn=null, lastLocation='', mapOk=false, privateMap=null;
+// Local actions only during the early outbreak. Long-distance travel is not a Day 1 choice.
+const localChoices={
+ mikel:[['hold','Call Daniel to ask what he actually saw'],['scavenge','Stop at a nearby pharmacy for a few essentials'],['rest','Stay home and follow official updates']],
+ avery:[['hold','Message Mikel and compare what each of you knows'],['scavenge','Pick up groceries while the shops are still open'],['rest','Stay in and watch for reliable local information']],
+ daniel:[['hold','Text the group about the ambulances you witnessed'],['scavenge','Visit the corner store for water and supplies'],['rest','Head home rather than investigate an unconfirmed rumor']],
+ bryce:[['hold','Ask a local shopkeeper whether anything unusual happened'],['scavenge','Buy a few essentials at an open store'],['rest','Go home and wait for verified information']],
+ howard:[['hold','Check the MTA service alerts and local advisories'],['scavenge','Pick up batteries and basic groceries nearby'],['rest','Stay inside and call family']],
+ curtis:[['hold','Check ferry and bus notices before making plans'],['scavenge','Visit a neighborhood store for supplies'],['rest','Stay home and monitor reports across the harbor']]
+};
+function choicesForTurn(){
+ const day=Math.floor((Math.max(1,Number(turn?.turn_number)||1)-1)/4)+1;
+ if(day<=3)return localChoices[String(name).toLowerCase()]||[['hold','Ask someone nearby what they have actually seen'],['scavenge','Buy a few essentials at a local shop'],['rest','Stay home and check official advisories']];
+ if(day<=7)return [['hold','Stay nearby and check official updates before moving'],['scavenge','Find food, water, or first aid supplies locally'],['rest','Find a safe place to recover and monitor the situation']];
+ return [['hold','Observe the area and plan your next move'],['scavenge','Search nearby for useful supplies'],['rest','Rest in the safest shelter you can find']];
+}
+
 const esc=x=>String(x??'').replace(/[&<>"']/g,z=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[z]));
 const msg=x=>{$('afLiveMessage').textContent=x};
 async function rpc(fn,args={}){const {data,error}=await c().rpc(fn,args);if(error)throw new Error(error.message);return data}
@@ -1793,19 +1808,29 @@ function mapPosition(position){
  $('mapFallback').classList.add('af-show-fallback');
 }
 function choiceUI(){const el=$('afLiveChoices');el.replaceChildren();if(!turn||turn.phase!=='collecting')return;
- const actions=[['hold','Stay here and assess your surroundings'],['scavenge','Carefully search nearby for supplies'],['rest','Find shelter and rest'],...destinations.map((t,i)=>['travel:'+i,'Travel toward '+t[0]])];
+ const actions=choicesForTurn();
  for(const [key,label] of actions){const b=document.createElement('button');b.className='af-choice'+(chosen===key?' active':'');b.textContent=label;b.onclick=()=>{chosen=key;choiceUI()};el.appendChild(b)}
- const submit=document.createElement('button');submit.className='af-live-button';submit.textContent='LOCK IN PRIVATE DECISION';submit.disabled=pending;submit.onclick=async()=>{pending=true;submit.disabled=true;try{const action={kind:chosen};if(chosen.startsWith('travel:')){const t=destinations[Number(chosen.split(':')[1])];action.target={label:t[0],lat:t[1],lon:t[2]}}await rpc('af_live_submit',{p_action:action});msg('Your decision is locked. Waiting for the other survivors.');await refresh()}catch(e){msg('Action failed: '+e.message)}finally{pending=false}};el.appendChild(submit)
+ const submit=document.createElement('button');submit.className='af-live-button';submit.textContent='LOCK IN PRIVATE DECISION';submit.disabled=pending||!chosen;submit.onclick=async()=>{pending=true;submit.disabled=true;try{if(!chosen)throw new Error('Choose an action first.');const action={kind:chosen};await rpc('af_live_submit',{p_action:action});msg('Your decision is locked. Waiting for the other survivors.');await refresh()}catch(e){msg('Action failed: '+e.message);const error=document.createElement('p');error.className='af-small';error.style.color='#ffb5a5';error.textContent='Could not lock decision: '+e.message;el.appendChild(error)}finally{pending=false}};el.appendChild(submit)
 }
 function journal(events){const entries=(events||[]).slice().reverse();$('afLiveJournal').innerHTML='<div class="sub">YOUR PRIVATE CHRONICLE</div>'+ (entries.length?entries.map(e=>'<p><b>Turn '+Number(e.turn_number)+'</b> · '+esc(e.body)+'</p>').join(''):'<p>Your own consequences will appear here after the first completed turn.</p>')}
 function render(s){turn=s.turn;const pos=s.position;if(pos)mapPosition(pos);journal(s.events);$('onlineCount').textContent='· '+s.participants+' ACTIVE IN CAMPAIGN';
  $('afLiveChoices').replaceChildren();$('chapterBook').textContent='Live campaign chronicle is shown below. Your private actions are not shared with other survivors.';const st=s.survival||{};const stats=$('afV52Survival');if(stats){stats.textContent=st.health===undefined?'SURVIVAL · Waiting for Day 1':'SURVIVAL · Health '+st.health+' · Food '+st.food+' · Water '+st.water+' · Medicine '+st.medicine+' · Fatigue '+st.fatigue+' · Stress '+st.stress;}
  if(!turn){$('afLiveTitle').textContent='WAITING TO START · LIVE LOBBY';msg(s.participants+' survivors have completed their profiles. All six must have completed surveys or be assigned automatic NPCs before starting.');if(name.toLowerCase()==='mikel'){
  const b=document.createElement('button');b.className='af-live-button';b.textContent='START SHARED CAMPAIGN';b.onclick=async()=>{b.disabled=true;try{await rpc('af_live_start');await refresh()}catch(e){msg('Cannot start: '+e.message)}finally{b.disabled=false}};$('afLiveChoices').appendChild(b)}return}
- if(lastTurn!==turn.turn_number){lastTurn=turn.turn_number;chosen='hold'}
+ if(lastTurn!==turn.turn_number){lastTurn=turn.turn_number;chosen=null}
  $('afLiveTitle').textContent='TURN '+turn.turn_number+' · '+turn.title;$('sceneTitle').textContent=turn.title;
- const narrative=turn.prompt+'\n\n'+(s.perspective||'');$('chapterBook').textContent=narrative;
- const head=document.createElement('p');head.textContent=turn.prompt;$('afLiveChoices').appendChild(head);
+ const nameKey=String(name||'').toLowerCase();
+ const introByName={
+ mikel:'Merrick, New York. It is an ordinary evening. A car rolls past the house, and somewhere a television plays too loudly. Your phone lights up with a message from Daniel about unusual ambulance traffic in Brooklyn. You have no reason yet to believe this night will change your life.',
+ avery:'Merrick, New York. The neighborhood looks normal: porch lights, passing cars, the familiar hum of life after dark. A vague alert appears on your phone, but nobody nearby seems particularly concerned.',
+ daniel:'Canarsie, Brooklyn. You step outside and hear another ambulance passing several blocks away. The shops are still open and traffic is moving. You have seen enough to be curious, not enough to understand what is happening.',
+ bryce:'Brooklyn, New York. The evening traffic crawls along, a shopkeeper pulls down a gate at the usual hour, and an unverified story about a hospital begins circulating through your messages.',
+ howard:'Sunset Park, Brooklyn. Trains are still running, and the streets carry their usual mix of conversations and traffic. A regional notice appears on your phone, vague enough to be easy to dismiss.',
+ curtis:'Staten Island, New York. The neighborhood is quiet, and the city across the harbor feels far away. A news notification mentions emergency calls in another borough. Nothing around you looks different.'
+ };
+ const opening=turn.turn_number===1?(introByName[nameKey]||'New York is still functioning. The first strange reports are easy to dismiss.'):'The city has not stopped all at once. Each neighborhood experiences the growing crisis differently, and your next decision will shape what you learn.';
+ const narrative=opening+'\n\n'+turn.prompt+'\n\n'+(s.perspective||'');$('chapterBook').textContent=narrative;
+ const head=document.createElement('p');head.style.whiteSpace='pre-line';head.textContent=opening+'\n\n'+turn.prompt;$('afLiveChoices').appendChild(head);
  const perspective=document.createElement('p');perspective.textContent=s.perspective||'';$('afLiveChoices').appendChild(perspective);
  if(s.my_mode!=='active'){msg('Your character is '+s.my_mode+'. Decisions are unavailable until Mikel assigns you Active.');const p=document.createElement('p');p.className='af-small';p.textContent='NPCs make automatic server-side decisions; inactive characters do not participate.';$('afLiveChoices').appendChild(p)}else if(s.submitted_by_me){msg('Decision submitted · '+s.submitted+' / '+s.participants+' survivors ready. Your decision stays private.');const p=document.createElement('p');p.className='af-small';p.textContent='Waiting for the remaining active players.';$('afLiveChoices').appendChild(p)}else{msg('LIVE · '+s.submitted+' / '+s.participants+' survivors ready. Select your decision.');choiceUI()}
 }
@@ -1911,3 +1936,5 @@ button.addEventListener('click',async()=>{
 </body></html>
 
 <!-- v23: Curtis begins at an approximate location on Staten Island, NY; no street address supplied. -->
+
+<!-- V55: decision selection persists across polling; story intro appears above live decisions. -->
