@@ -579,7 +579,7 @@ drawProfile=function(){
  $('#tabContent').innerHTML=html;
 };
 
-document.getElementById('walletShortcut').onclick=()=>{if(claimed===null){showClaim();return}selected=Number(claimed);tab='wallet';drawPlayers();drawProfile()};$('#zoomIn').onclick=()=>map&&map.zoomTo(Math.min(14.4,map.getZoom()+0.5));$('#zoomOut').onclick=()=>map&&map.zoomTo(Math.max(12.7,map.getZoom()-0.5));$('#wpBtn').onclick=()=>{waypointMode=!waypointMode;$('#mapState').textContent=`WAYPOINT MODE: ${waypointMode?'CLICK MAP':'OFF'}`};$('#clearWp').onclick=()=>{waypoints.forEach(x=>x.remove());waypoints=[];$('#waypointText').textContent='Waypoints cleared'};$('#submit').onclick=submitAction;$('#actionInput').onkeydown=e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();submitAction()}};document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;drawProfile()});$('#sessionBtn').onclick=()=>{drawSession();$('#modalback').classList.remove('hide')};$('#closeModal').onclick=()=>$('#modalback').classList.add('hide');$('#applySession').onclick=()=>{document.querySelectorAll('[data-status]').forEach(s=>{if(claimed!==null&&+s.dataset.status===Number(claimed)){session[+s.dataset.status]='active'}else{session[+s.dataset.status]=s.value}});$('#modalback').classList.add('hide');drawPlayers();drawProfile();appendLog('Session permissions updated. Temporary NPC assignments apply only to this session.','SESSION CONTROL')};$('#nextBtn').onclick=()=>{if(paused)return;gameMinutes+=15;drawClock();appendLog('Fifteen in-game minutes have passed. This demo does not simulate automatic health changes.','TIME ADVANCED')};$('#pauseBtn').onclick=()=>{paused=!paused;$('#pauseBtn').textContent=paused?'RESUME':'PAUSE';appendLog(paused?'Game paused.':'Game resumed.','SESSION CONTROL')};$('#recapBtn').onclick=()=>appendLog('Chapter 1: The group is spread across New York, with Daniel and Bryce both in Canarsie. Mikel has received a strange message from Daniel about ambulances. No player decisions have been resolved yet.','RECAP');$('#saveBtn').onclick=()=>{const data={gameMinutes,session,selected,claimed,wallets,actions:$('#log').innerText,waypoints:waypoints.map(w=>w.getLngLat())};localStorage.setItem('afterfall_draft_save',JSON.stringify(data));appendLog('Draft state saved to this browser. This is not a cloud multiplayer save.','SAVE')};function showClaim(){if(claimed!==null)return;document.getElementById('claimOverlay').classList.remove('hide')}
+document.getElementById('walletShortcut').onclick=()=>{if(claimed===null){showClaim();return}selected=Number(claimed);tab='wallet';drawPlayers();drawProfile()};$('#zoomIn').onclick=()=>map&&map.zoomTo(Math.min(14.4,map.getZoom()+0.5));$('#zoomOut').onclick=()=>map&&map.zoomTo(Math.max(12.7,map.getZoom()-0.5));$('#wpBtn').onclick=()=>{waypointMode=!waypointMode;$('#mapState').textContent=`WAYPOINT MODE: ${waypointMode?'CLICK MAP':'OFF'}`};$('#clearWp').onclick=()=>{waypoints.forEach(x=>x.remove());waypoints=[];$('#waypointText').textContent='Waypoints cleared'};$('#submit').onclick=submitAction;$('#actionInput').onkeydown=e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();submitAction()}};document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;drawProfile()});$('#sessionBtn').onclick=()=>{drawSession();$('#modalback').classList.remove('hide')};$('#closeModal').onclick=()=>$('#modalback').classList.add('hide');$('#applySession').onclick=()=>{document.querySelectorAll('[data-status]').forEach(s=>{if(claimed!==null&&+s.dataset.status===Number(claimed)){session[+s.dataset.status]='active'}else{session[+s.dataset.status]=s.value}});$('#modalback').classList.add('hide');drawPlayers();drawProfile();appendLog('Session permissions updated. Temporary NPC assignments apply only to this session.','SESSION CONTROL')};$('#nextBtn').onclick=()=>{if(paused)return;gameMinutes+=15;drawClock();appendLog('Fifteen in-game minutes have passed. This demo does not simulate automatic health changes.','TIME ADVANCED')};$('#pauseBtn').onclick=()=>{paused=!paused;$('#pauseBtn').textContent=paused?'RESUME':'PAUSE';appendLog(paused?'Game paused.':'Game resumed.','SESSION CONTROL')};$('#recapBtn').onclick=()=>appendLog('Chapter 1: The group is spread across New York, with Daniel and Bryce both in Canarsie. Mikel has seen unverified reports about ambulance activity. No player decisions have been resolved yet.','RECAP');$('#saveBtn').onclick=()=>{const data={gameMinutes,session,selected,claimed,wallets,actions:$('#log').innerText,waypoints:waypoints.map(w=>w.getLngLat())};localStorage.setItem('afterfall_draft_save',JSON.stringify(data));appendLog('Draft state saved to this browser. This is not a cloud multiplayer save.','SAVE')};function showClaim(){if(claimed!==null)return;document.getElementById('claimOverlay').classList.remove('hide')}
 function claimCharacter(i){if(claimed!==null)return;claimed=String(i);localStorage.setItem('afterfall_claimed_character',claimed);selected=i;updateCashSidebar();document.getElementById('claimOverlay').classList.add('hide');document.getElementById('claimedBadge').textContent='PLAYING: '+people[i].name.toUpperCase();drawPlayers();drawProfile();syncMapToCharacter();appendLog('You claimed '+people[i].name+'. Only this character can submit your actions. This local draft does not reserve the character across other devices.','CHARACTER CLAIM')}
 document.querySelectorAll('[data-claim]').forEach(b=>b.addEventListener('click',()=>claimCharacter(Number(b.dataset.claim))));
 if(claimed!==null)document.getElementById('claimedBadge').textContent='PLAYING: '+people[Number(claimed)].name.toUpperCase();
@@ -756,7 +756,7 @@ if(map){map.resize();map.on('load',()=>map.resize())}
 // Turn-gate prototype. This browser has no shared server or AI API.
 // A real deployment must authenticate players and validate all readiness/choices server-side.
 const sceneQuestions=[
- {kind:'multiple',title:'A Thursday night in Queens',prompt:'It is 9:43 PM. The city is still moving, and nothing has been confirmed. Mikel receives a message from Daniel, who is in Canarsie, when Daniel texts: “Are you guys seeing the ambulance traffic? Call me when you can.” What do you do?',options:['Call Daniel and ask what he actually saw','Stay together and walk toward the main avenue to see what is happening','Reply that you are fine and continue with your original plans']},
+ {kind:'multiple',title:'A Thursday night in Queens',prompt:'It is 9:43 PM. The city is still moving, and nothing has been confirmed. An unverified report mentions unusual ambulance traffic in Brooklyn. What do you do?',options:['Call Daniel and ask what he actually saw','Stay together and walk toward the main avenue to see what is happening','Reply that you are fine and continue with your original plans']},
  {kind:'multiple',title:'The ordinary world',prompt:'A siren passes. A bus hisses at the curb; someone complains about the cold. There is no immediate threat. What is your next plan?',options:['Find somewhere warm to sit and compare what everyone knows','Head toward the subway and check whether service is normal','Go home while the streets are still ordinary']},
  {kind:'multiple',title:'Two conflicting accounts',prompt:'Daniel says he heard that an emergency room is diverting patients. A local news alert only mentions delays. Neither source establishes what happened. How do you handle the information?',options:['Ask Daniel for a location, time, and first-hand details','Check official transit and hospital updates before changing plans','Keep the warning in mind without spreading an unverified rumor']},
  {kind:'short',title:'An unexpected interruption',prompt:'Your phone rings from a familiar contact at an unusual hour. What do you say or do?'} ,
@@ -765,7 +765,7 @@ const sceneQuestions=[
 ];
 // Character-specific private opening decisions. No survivor sees their own name as a third party.
 const openingPersonal={
- Mikel:{title:'A message from Canarsie',prompt:'Your phone buzzes in Merrick. Daniel asks whether you have noticed unusual ambulance traffic. The neighborhood outside still looks normal. What do you do?',options:['Call Daniel and ask what he witnessed','Check local reports before responding','Reply that Merrick seems quiet and keep your plans']},
+ Mikel:{title:'A message from Canarsie',prompt:'You see a local report about unusual ambulance traffic, but Daniel has not contacted you. The neighborhood outside still looks normal. What do you do?',options:['Call Daniel and ask what he witnessed','Check local reports before responding','Reply that Merrick seems quiet and keep your plans']},
  Avery:{title:'A quiet street in Merrick',prompt:'A regional alert flashes on your phone. A car passes and neighbors are still at home. You have no direct evidence of an emergency. What do you do?',options:['Message Mikel to compare what you have heard','Check official alerts and transit notices','Ignore the vague alert for now and carry on']},
  Daniel:{title:'Sirens in Canarsie',prompt:'You are in Canarsie when another ambulance passes. You have heard an unconfirmed rumor about a crowded emergency department. You have not received a message from yourself. What do you do?',options:['Text the group about what you personally noticed','Walk to a safer public place and observe','Check the news before telling anyone there is a crisis']},
  Bryce:{title:'A strange evening in Brooklyn',prompt:'Traffic moves normally in Canarsie, but sirens seem more frequent than usual. A friend shares an unverified hospital rumor. What do you do?',options:['Ask a nearby shopkeeper what they have seen','Contact Daniel to compare reports','Continue your plans while keeping your phone charged']},
@@ -1806,13 +1806,29 @@ const afDecisionScenes=[
  ['Confirm which roads are still usable before committing','Find spare supplies without entering a dangerous area','Secure your shelter and recover overnight']
  ]];
 function choicesForTurn(){
- const n=Math.max(1,Number(turn?.turn_number)||1),day=Math.floor((n-1)/4)+1;
- const scene=afDecisionScenes[Math.min(afDecisionScenes.length-1,Math.floor((n-1)/4))][(n-1)%4];
- // Character-specific first turn preserves each survivor's personal opening.
- if(n===1)return localChoices[String(name).toLowerCase()]||[['hold',scene[0]],['scavenge',scene[1]],['rest',scene[2]]];
- // Later turns use a rotating set of distinct scenes, not the same generic menu.
- if(n>16){const cycle=Math.floor((n-1)/16),suffix=['at this stage of the crisis','given what happened yesterday','before the next official update','with your current supplies'][cycle%4];return [['hold',scene[0]+' '+suffix],['scavenge',scene[1]+' '+suffix],['rest',scene[2]+' '+suffix]]}
- return [['hold',scene[0]],['scavenge',scene[1]],['rest',scene[2]]];
+ const n=Math.max(1,Number(turn?.turn_number)||1);
+ const choices=[
+ ['Document what the official report actually says','Visit a nearby store to check whether essentials are still available','Stay home and make a practical plan for tomorrow'],
+ ['Speak with a neighbor who witnessed the emergency response','Find batteries and charge your devices while power is stable','Get some sleep before the situation becomes more disruptive'],
+ ['Verify the hospital rumor using a reliable source','Check local shops for medical supplies','Keep your routine and avoid spreading unconfirmed stories'],
+ ['Call the city information line for clarification','Prepare a small bag in case you need to leave','Remain indoors and watch for an official update'],
+ ['Ask a transit worker about the unexpected route changes','Pick up food that will keep without refrigeration','Rest and decide whether travel is necessary tomorrow'],
+ ['Compare the hospital denial with the original claim','Visit a pharmacy to ask what has actually changed','Stay close to home until you have better information'],
+ ['Check whether your block has power and working communications','Collect water and practical supplies','Take time to recover while utilities are working'],
+ ['Listen to the interrupted broadcast and note what was confirmed','Look for a functioning radio or spare batteries','Avoid speculation and keep your evening quiet'],
+ ['Check the volunteer supply list for obvious mistakes','Help organize supplies for the next few days','Stay home and avoid unnecessary travel'],
+ ['Read the new city restriction carefully','Find a safer route around the restricted area','Remain where you are until the restriction is clarified'],
+ ['Contact an official source about the hospital measures','Secure basic first-aid materials','Take a break from conflicting rumors'],
+ ['Verify the train disruption before planning travel','Gather necessities while nearby stores remain open','Stay off transit and rest'],
+ ['Compare the two versions of the city notice','Make sure your household has a backup plan','Wait for a corrected public announcement'],
+ ['Speak to someone outside the clinic without making assumptions','Check whether nearby services are still open','Return home and avoid the crowd'],
+ ['Look for independent confirmation of the missing broadcast','Prepare for possible communication disruptions','Stay inside and monitor developments'],
+ ['Compare the latest advisory with previous guidance','Gather what you would need for an overnight stay elsewhere','Stay put while you evaluate the new instructions']
+ ];
+ const c=choices[(n-1)%choices.length];
+ const cycle=Math.floor((n-1)/choices.length);
+ const prefix=cycle?'On day '+n+', ':'';
+ return [['hold',prefix+c[0]],['scavenge',prefix+c[1]],['rest',prefix+c[2]]];
 }
 
 const esc=x=>String(x??'').replace(/[&<>"']/g,z=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[z]));
@@ -1843,11 +1859,11 @@ function choiceUI(){const el=$('afLiveChoices');el.querySelectorAll('.af-choice,
 
 // V57: long-form private chapter before each decision. Scripted, not generative AI.
 function afStoryChapter(turn, survivor, location, events){
- const t=Math.max(1,Number(turn?.turn_number)||1),day=Math.floor((t-1)/4)+1;
+ const t=Math.max(1,Number(turn?.turn_number)||1),day=t;
  const who=String(survivor||'').toLowerCase();
  const place=location||({mikel:'Merrick, Long Island',avery:'Merrick, Long Island',daniel:'Canarsie, Brooklyn',bryce:'Brooklyn',howard:'Sunset Park, Brooklyn',curtis:'Staten Island'}[who]||'New York');
  const people={
- mikel:{home:'The house is familiar: the television in the next room, a half-finished drink on the table, the quiet rhythm of an ordinary evening.',contact:'Daniel sends a short message about the ambulances he has noticed in Brooklyn. You read it twice. He sounds concerned, but he is not claiming to know what is happening.',detail:'A passing car slows for a turn at the end of the block. Nothing outside suggests you need to leave Merrick tonight.'},
+ mikel:{home:'The house is familiar: the television in the next room, a half-finished drink on the table, the quiet rhythm of an ordinary evening.',contact:'An unverified local report mentions increased ambulance activity in Brooklyn. You have not heard directly from Daniel.',detail:'A passing car slows for a turn at the end of the block. Nothing outside suggests you need to leave Merrick tonight.'},
  avery:{home:'Porch lights flicker on across the neighborhood. Someone is walking a dog, and two neighbors talk beside a parked car.',contact:'A vague regional notification appears on your phone. It mentions increased emergency calls, without explaining what caused them.',detail:'You wonder whether Mikel has heard anything more concrete. For now, the streets around you look unchanged.'},
  daniel:{home:'The shops along the avenue are still doing business. A bus pulls away from the curb, and people wait impatiently at the crossing.',contact:'Another ambulance passes, heading somewhere beyond your view. A rumor about a hospital appears in a group chat, but nobody can name a reliable source.',detail:'You could warn your friends about what you actually saw. Anything beyond that would be a guess.'},
  bryce:{home:'The evening is busy in Brooklyn. Delivery bikes pass storefronts, and a shopkeeper begins stacking boxes near the entrance.',contact:'A friend forwards a shaky video with a dramatic caption. It is impossible to tell where it was filmed, or even when.',detail:'The person behind the counter seems more worried about closing on time than the video. That makes the rumor easier to dismiss.'},
@@ -1872,6 +1888,26 @@ function afStoryChapter(turn, survivor, location, events){
  'The streets are not suddenly ancient ruins. There are fresh barricades, hurried repairs, abandoned errands, and signs that people have been making difficult decisions recently.',
  'Every choice now has a history behind it. What you know, whom you trust, and what you have saved will matter more than any rumor.'
  ];
+ const dailyDevelopments=[
+ 'A city health spokesperson holds a brief press conference. Most questions go unanswered, and a reporter notices that the official incident count has quietly changed since morning.',
+ 'A neighborhood pharmacy opens late. A handwritten sign says some deliveries were cancelled, though the cashier cannot explain why.',
+ 'A local radio station airs a caller describing an emergency-room closure. The host says the account has not been verified.',
+ 'An official advisory asks residents to avoid one intersection. The advisory disappears from the city website twenty minutes later.',
+ 'A bus driver tells waiting passengers that several routes were redirected without warning. Nobody at dispatch will explain.',
+ 'A hospital spokesperson denies a rumor about missing patients. The denial addresses a different hospital from the one named in the rumor.',
+ 'A short power outage leaves several blocks dark. Service returns, but an emergency announcement cuts off midway through.',
+ 'A television interview is interrupted when a producer hands the anchor a note. The anchor ends the segment early.',
+ 'A community volunteer shares a list of places offering supplies. One address on the list does not exist.',
+ 'A city bulletin confirms restricted access near a medical facility. Officials refuse to say how long it will last.',
+ 'A relative of a hospital worker describes unusual security measures. They ask that their name not be shared.',
+ 'A commuter train stops between stations. Transit officials call it a routine signal issue; riders report seeing emergency crews.',
+ 'A municipal website publishes two different versions of the same notice. Both carry the same timestamp.',
+ 'A small crowd gathers outside a clinic after appointments are cancelled without explanation.',
+ 'An overnight broadcast says the situation is under control. By morning, the station has removed the recording.',
+ 'A new advisory finally acknowledges a broader disruption, but its instructions conflict with an earlier notice.'
+ ];
+ const dailyEvent=dailyDevelopments[(t-1)%dailyDevelopments.length];
+ const progression='DAY '+day+' UPDATE: '+dailyEvent;
  const prior=(events||[]).slice(-2).map(e=>String(e.body||'').trim()).filter(Boolean);
  return [
  `DAY ${day} · ${place.toUpperCase()}`,
@@ -1879,7 +1915,8 @@ function afStoryChapter(turn, survivor, location, events){
  p.home,
  p.contact,
  p.detail,
- ...stage,
+ progression,
+ ...stage.slice((t-1)%3,(t-1)%3+1),
  ...(prior.length?['What happened earlier still sits with you: '+prior.join(' ')]:[]),
  'For the moment, there is no perfect answer. You have a little time to think, and then you will have to choose what to do next.'
  ].join('\n\n');
@@ -1895,7 +1932,7 @@ const afTwistChapters={
  44:['THE RETURN','A message arrives from a location the authorities said had been evacuated. It contains a mundane detail that only someone familiar with the neighborhood would know.']
 };
 function afSharedChapter(turn,ctx){
- const n=Math.max(1,Number(turn?.turn_number)||1),day=Math.floor((n-1)/4)+1;
+ const n=Math.max(1,Number(turn?.turn_number)||1),day=n;
  const members=(ctx?.group?.members||[]).slice().sort();
  const groupName=ctx?.group?.name||'The group';
  const news=ctx?.news||afNewsFallback;
