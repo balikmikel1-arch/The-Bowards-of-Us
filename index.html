@@ -458,7 +458,7 @@ html,body{min-height:100%;}
 .past-chapters{min-width:0!important;width:100%!important;box-sizing:border-box!important;flex:0 0 auto!important}
 .past-chapters summary{white-space:normal!important;overflow-wrap:break-word!important}
 @media(max-width:720px){.chapter-book{height:390px!important;min-height:300px!important}.story-log{padding:18px 16px 22px!important}.choice-panel,.scene-gate{margin-left:10px!important;margin-right:10px!important}}
-</style><style>.scale-hint{display:block;color:#c9c5b9;font-size:11px;margin:4px 0 7px;line-height:1.4}</style></head><body><header><div><div class="brand">AFTER<span>FALL</span> <span style="font-size:12px;color:#a5b1bc">/ NYC 2026</span></div><div class="sub">MULTIPLAYER SURVIVAL · INTERACTIVE PROTOTYPE</div></div><div class="header-right"><span class="pill" id="claimedBadge">● UNCLAIMED</span><div style="text-align:right"><div class="clock" id="clock">21:43</div><div class="tiny" id="date">NOV 12, 2026 · 46°F</div></div><button class="btn small" id="sessionBtn">⚙ LOBBY</button></div></header><main class="grid"><aside class="sidebar"><div class="section-title">SURVIVORS <span id="onlineCount">· 6 ACTIVE</span></div><div id="players"></div><div class="divider"></div><div class="section-title">YOUR CASH</div><div class="cash-widget"><div class="cash-label">PERSONAL WALLET</div><div class="cash-amount" id="sidebarCash">$200.00</div><div class="cash-sub">Physical US dollars · private balance</div><button class="btn small" id="walletShortcut" style="margin-top:10px;width:100%">VIEW WALLET & TRANSACTIONS</button></div><div class="divider"></div><div class="section-title">YOUR CURRENT POSITION</div><div class="info"><h4 id="currentPlace">Midtown Manhattan</h4><p id="locDetails">New York City, New York</p><p>☾ Night · Autumn · Cold</p></div><div class="sidebar-hidden-systems" aria-hidden="true" style="display:none"><div class="section-title">MAP CAMERA</div><div class="info"><h4>🔒 LOCATION LOCKED</h4><p>Shows only the area around your claimed character. The map automatically moves to a new neighborhood when the game engine updates your character's location.</p><p class="note">You cannot switch cities, pan, drag, or scroll the map. Nearby friends appear only when their position is known.</p></div><div class="divider"></div><div class="section-title">CHARACTER & STORY SYSTEMS</div>
+</style><style>.scale-hint{display:block;color:#c9c5b9;font-size:11px;margin:4px 0 7px;line-height:1.4}</style></head><body><header><div><div class="brand">AFTER<span>FALL</span> <span style="font-size:12px;color:#a5b1bc">/ THE WORLD BEYOND NYC</span></div><div class="sub">MULTIPLAYER SURVIVAL · LIVE CAMPAIGN</div></div><div class="header-right"><span class="pill" id="claimedBadge">● UNCLAIMED</span><div style="text-align:right"><div class="clock" id="clock">21:43</div><div class="tiny" id="date">NOV 12, 2026 · 46°F</div></div><button class="btn small" id="sessionBtn">⚙ LOBBY</button></div></header><main class="grid"><aside class="sidebar"><div class="section-title">SURVIVORS <span id="onlineCount">· 6 ACTIVE</span></div><div id="players"></div><div class="divider"></div><div class="section-title">YOUR CASH</div><div class="cash-widget"><div class="cash-label">PERSONAL WALLET</div><div class="cash-amount" id="sidebarCash">$200.00</div><div class="cash-sub">Physical US dollars · private balance</div><button class="btn small" id="walletShortcut" style="margin-top:10px;width:100%">VIEW WALLET & TRANSACTIONS</button></div><div class="divider"></div><div class="section-title">YOUR CURRENT POSITION</div><div class="info"><h4 id="currentPlace">Midtown Manhattan</h4><p id="locDetails">New York City, New York</p><p>☾ Night · Autumn · Cold</p></div><div class="sidebar-hidden-systems" aria-hidden="true" style="display:none"><div class="section-title">MAP CAMERA</div><div class="info"><h4>🔒 LOCATION LOCKED</h4><p>Shows only the area around your claimed character. The map automatically moves to a new neighborhood when the game engine updates your character's location.</p><p class="note">You cannot switch cities, pan, drag, or scroll the map. Nearby friends appear only when their position is known.</p></div><div class="divider"></div><div class="section-title">CHARACTER & STORY SYSTEMS</div>
 
 <button class="btn full" id="eventJournalBtn" style="margin-bottom:8px">⚡ WORLD EVENTS <span id="eventCount">0</span></button>
 <div class="info"><h4>UNEXPECTED EVENTS</h4><p>Dynamic incidents may occur as time passes, while traveling, or during other players' storylines. Not every event needs a choice or a dramatic outcome.</p><p class="note">Demo probability: 18% per 15-minute advance; events are narrative prompts only until connected to the game engine.</p></div>
@@ -1607,7 +1607,7 @@ resolveAfterfallSpawns();
 #afAuthBadge{position:fixed;bottom:12px;right:12px;z-index:10050;background:#172c36;color:#e2e8e8;border:1px solid #4e6470;border-radius:9px;padding:8px;font-size:11px;max-width:260px}
 #afAuthBadge button{background:transparent;color:#e2c18e;border:0;cursor:pointer;margin-left:7px}
 </style>
-<div id="afAuthGate"><div id="afAuthCard"><div class="sub">AFTERFALL · ONLINE ACCOUNT</div><h2>ENTER THE AFTERFALL</h2><p>Sign in to your account before entering the game. Each player needs their own verified email address.</p><input id="afAuthEmail" type="email" autocomplete="email" placeholder="Email address" aria-label="Email address"><input id="afAuthPassword" type="password" autocomplete="current-password" placeholder="Password (at least 6 characters)" aria-label="Password"><button id="afSignIn" type="button">LOG IN</button><button id="afSignUp" class="secondary" type="button">CREATE ACCOUNT</button><button id="afForgot" class="secondary" type="button">RESET PASSWORD</button><p id="afAuthMessage" role="status">Connecting securely…</p><p style="border-top:1px solid #344a54;padding-top:13px">ONLINE LOGIN PREVIEW: This version authenticates accounts, but character claims, surveys, story, and deaths still save in this browser only. Do not treat it as synchronized multiplayer yet.</p></div></div>
+<div id="afAuthGate"><div id="afAuthCard"><div class="sub">AFTERFALL · ONLINE ACCOUNT</div><h2>ENTER THE AFTERFALL</h2><p>Sign in to your account before entering the game. Each player needs their own verified email address.</p><input id="afAuthEmail" type="email" autocomplete="email" placeholder="Email address" aria-label="Email address"><input id="afAuthPassword" type="password" autocomplete="current-password" placeholder="Password (at least 6 characters)" aria-label="Password"><button id="afSignIn" type="button">LOG IN</button><button id="afSignUp" class="secondary" type="button">CREATE ACCOUNT</button><button id="afForgot" class="secondary" type="button">RESET PASSWORD</button><p id="afAuthMessage" role="status">Connecting securely…</p><p style="border-top:1px solid #344a54;padding-top:13px">V48: Account-based character claims and survey backups are online. Story scenes, combat, and world consequences are still local prototypes.</p></div></div>
 <div id="afAuthBadge" style="display:none"><span id="afAccountName"></span><button id="afLogOut" type="button">Log out</button></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script id="v47-auth">
@@ -1629,6 +1629,161 @@ async function run(kind){try{msg('Please wait…');let result;if(kind==='in'){re
 document.getElementById('afSignIn').onclick=()=>run('in');document.getElementById('afSignUp').onclick=()=>run('up');document.getElementById('afForgot').onclick=()=>run('reset');document.getElementById('afLogOut').onclick=async()=>{const {error}=await client.auth.signOut();if(error)alert(error.message);else show(null)};
 })();
 </script>
-</body></html>
+<style id="v48-cloud-style">
+#afCloudGate{position:fixed;inset:0;z-index:10004;background:#070d13f5;display:none;align-items:center;justify-content:center;padding:18px;color:#e9efed}
+#afCloudGate.visible{display:flex}#afCloudPanel{background:#14232d;border:1px solid #5c7180;border-radius:14px;padding:25px;width:min(560px,100%);max-height:90vh;overflow:auto}
+#afCloudPanel h2{font:800 30px 'Barlow Condensed';margin:0 0 10px}#afCloudOptions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin:15px 0}
+#afCloudOptions button{background:#243744;color:#f4ead4;border:1px solid #5d6d71;border-radius:8px;padding:12px;cursor:pointer}#afCloudOptions button:disabled{opacity:.35;cursor:not-allowed}
+#afCloudStatus{color:#e7c58d;line-height:1.6;white-space:pre-wrap}#afCloudPanel p{color:#b2c5c9;line-height:1.6}
+</style>
+<div id="afCloudGate"><div id="afCloudPanel"><div class="sub">AFTERFALL · ONLINE SURVIVOR</div><h2>CHOOSE YOUR SURVIVOR</h2><p>Your character belongs to your account, not this computer. Each survivor can be claimed once. Complete the 60-question profile after claiming.</p><div id="afCloudOptions"></div><p id="afCloudStatus" role="status">Connecting to campaign…</p></div></div>
+<script id="v48-cloud-characters">
+(()=>{
+'use strict';
+const NAMES=['Mikel','Avery','Daniel','Bryce','Howard','Curtis','Nick'];
+const PROFILE_KEY='afterfall_v44_simplified_60_profiles';
+const gate=document.getElementById('afCloudGate'), options=document.getElementById('afCloudOptions'), status=document.getElementById('afCloudStatus');
+let user=null, own=null, busy=false, lastSurvey='';
+const client=()=>window.afterfallSupabase;
+const say=s=>{status.textContent=s};
+function localForOwner(row){
+ const index=NAMES.findIndex(n=>n.toLowerCase()===row.character_name.trim().toLowerCase());
+ if(index<0)throw Error('Unrecognized character on this account.');
+ const ownerKey='afterfall_v48_local_owner';
+ if(localStorage.getItem(ownerKey)!==row.user_id){
+  // Do not carry one signed-in account's survey into another account's session.
+  localStorage.removeItem(PROFILE_KEY);
+  localStorage.removeItem('afterfall_claimed_character');
+  localStorage.setItem(ownerKey,row.user_id);
+ }
+ const data=row.survey;
+ if(Array.isArray(data?.answers)&&data.answers.length===60){
+  const profiles={};profiles[index]=data.answers;
+  localStorage.setItem(PROFILE_KEY,JSON.stringify(profiles));
+ }
+ localStorage.setItem('afterfall_claimed_character',String(index));
+ claimed=String(index);selected=index;
+ try{const profiles=JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}');if(Array.isArray(profiles[index])){people[index].profileReady=true}}catch(e){}
+ drawPlayers();drawProfile();updateCashSidebar();syncMapToCharacter();
+ document.getElementById('claimedBadge').textContent='PLAYING: '+NAMES[index].toUpperCase()+' · CLOUD';
+ gate.classList.remove('visible');
+ if(!row.survey_complete){
+  document.getElementById('originOverlay').classList.remove('hide');
+  const button=document.querySelector('#originCharacters [data-origin="'+index+'"]');
+  if(button)button.click();
+ }else{document.getElementById('originOverlay').classList.add('hide')}
+ lastSurvey=JSON.stringify(row.survey?.answers||[]);
+}
+async function load(){
+ const c=client();if(!c)return;
+ const {data:auth,error:authError}=await c.auth.getUser();if(authError||!auth.user){gate.classList.remove('visible');return}
+ user=auth.user;gate.classList.add('visible');say('Loading your character…');
+ const {data:rows,error}=await c.from('af_players').select('user_id,character_name,survey,survey_complete').eq('user_id',user.id).limit(1);
+ if(error){say('Database error: '+error.message);return}
+ if(rows?.length){own=rows[0];localForOwner(own);return}
+ const {data:taken,error:err}=await c.from('af_players').select('character_name');
+ // The own-player RLS policy intentionally hides others. Unavailable names are rejected by the database unique index.
+ if(err){say('Unable to check characters: '+err.message);return}
+ options.innerHTML='';NAMES.forEach(name=>{const b=document.createElement('button');b.textContent=name;b.onclick=()=>claim(name);options.appendChild(b)});
+ say('Choose your character. If someone already claimed it, the server will reject the duplicate.');
+}
+async function claim(name){
+ if(busy||!user)return;busy=true;say('Claiming '+name+'…');
+ const {data,error}=await client().from('af_players').insert({user_id:user.id,character_name:name}).select('user_id,character_name,survey,survey_complete').single();
+ busy=false;
+ if(error){say(error.code==='23505'?'That survivor is already claimed. Choose another.':error.message);return}
+ own=data;localForOwner(data);
+}
+async function saveSurvey(){
+ if(!user||!own)return;
+ const idx=NAMES.findIndex(n=>n.toLowerCase()===own.character_name.toLowerCase());
+ let a;try{a=JSON.parse(localStorage.getItem(PROFILE_KEY)||'{}')[idx]}catch(e){return}
+ if(!Array.isArray(a)||a.length!==60)return;
+ const serialized=JSON.stringify(a);if(serialized===lastSurvey)return;
+ const complete=a.every(x=>x!==null&&x!==undefined&&String(x).trim()!=='');
+ const {error}=await client().from('af_players').update({survey:{answers:a},survey_complete:complete}).eq('user_id',user.id);
+ if(error){console.error('AFTERFALL survey cloud save failed:',error);say('Survey cloud save failed: '+error.message);return}
+ lastSurvey=serialized;
+}
+// Existing survey still runs unchanged; its local saves are mirrored to the authenticated player's row.
+window.addEventListener('storage',e=>{if(e.key===PROFILE_KEY)saveSurvey()});
+setInterval(saveSurvey,2500);
+let authUserId=null;
+const ready=setInterval(()=>{
+ if(!client())return;clearInterval(ready);
+ client().auth.onAuthStateChange((_evt,session)=>{
+  const id=session?.user?.id||null;
+  if(id!==authUserId){authUserId=id;user=null;own=null;lastSurvey='';if(id) setTimeout(load,0);else gate.classList.remove('visible')}
+ });
+ client().auth.getSession().then(({data})=>{if(data.session?.user){authUserId=data.session.user.id;load()}});
+},100);
+})();
+</script>
+<style id="af-v50-style">
+body.af-live-ready #sceneGate,body.af-live-ready #choicePanel,body.af-live-ready .story-tools,body.af-live-ready #log,body.af-live-ready #freeActionArea,body.af-live-ready #pastChapters,body.af-live-ready #chapterBook,body.af-live-ready #sessionBtn,body.af-live-ready #mapFallback .map-fallback-dot{display:none!important}
+#afLiveOriginal{display:none;padding:17px 18px;border:1px solid #5b665f;border-radius:10px;background:#111e26;color:#e5e9e6;margin:12px 0 20px}
+body.af-live-ready #afLiveOriginal{display:block}
+#afLiveOriginal h3{font:700 23px 'Barlow Condensed',sans-serif;letter-spacing:1px;color:#e7c08a;margin:5px 0 12px}
+#afLiveOriginal p{line-height:1.6;color:#c9d2d5}#afLiveOriginal .af-choice{display:block;width:100%;text-align:left;border:1px solid #4c626b;background:#23343c;color:#f2f4f0;padding:12px;border-radius:7px;margin:7px 0;cursor:pointer}
+#afLiveOriginal .af-choice.active{border-color:#e1ba81;background:#4c4131}#afLiveOriginal .af-live-button{padding:12px 16px;background:#d6b47c;color:#15212a;border:0;border-radius:6px;font-weight:bold;cursor:pointer;margin:9px 0}
+#afLiveOriginal .af-live-button:disabled{opacity:.5;cursor:default}#afLiveOriginal .af-small{font-size:12px;color:#b9c8cc}
+#afLiveOriginal .af-journal{max-height:250px;overflow:auto;border-top:1px solid #40515a;margin-top:12px;padding-top:10px}
+body.af-live-ready #map{display:none!important}body.af-live-ready #afPrivateMap{display:block!important;position:absolute;inset:0;z-index:1}body.af-live-ready #mapFallback{display:none!important}body.af-live-ready #players .player-sub{display:none!important}body.af-live-ready #legend{display:none!important}
+body.af-live-ready #mapFallback.af-show-fallback{display:block!important}body.af-live-ready #mapFallback.af-show-fallback~.map-overlay{pointer-events:none}
+body.af-live-ready .chronicle-explainer{display:none}
+</style>
+<script id="af-v50-live-original">
+(()=>{'use strict';
+const $=id=>document.getElementById(id), c=()=>window.afterfallSupabase;
+const panel=document.createElement('section');panel.id='afLiveOriginal';panel.innerHTML='<div class="sub">AFTERFALL · SHARED WORLD · LIVE MULTIPLAYER</div><h3 id="afLiveTitle">CONNECTING TO THE WORLD</h3><p id="afLiveMessage">Checking your survivor…</p><div id="afLiveChoices"></div><div class="af-journal" id="afLiveJournal"></div>';
+const story=document.querySelector('.story');story.insertBefore(panel,story.firstChild);
+let userId=null, name='', turn=null, chosen='hold', pending=false, lastTurn=null, lastLocation='', mapOk=false, privateMap=null;
+const destinations=[['Newark, New Jersey',40.7357,-74.1724],['Philadelphia, Pennsylvania',39.9526,-75.1636],['Albany, New York',42.6526,-73.7562],['Boston, Massachusetts',42.3601,-71.0589],['Washington, DC',38.9072,-77.0369],['Pittsburgh, Pennsylvania',40.4406,-79.9959],['Chicago, Illinois',41.8781,-87.6298],['Atlanta, Georgia',33.749,-84.388],['Miami, Florida',25.7617,-80.1918],['Los Angeles, California',34.0522,-118.2437],['Toronto, Canada',43.6532,-79.3832]];
+const esc=x=>String(x??'').replace(/[&<>"']/g,z=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[z]));
+const msg=x=>{$('afLiveMessage').textContent=x};
+async function rpc(fn,args={}){const {data,error}=await c().rpc(fn,args);if(error)throw new Error(error.message);return data}
+function mapPosition(position){
+ const lat=Number(position?.lat),lon=Number(position?.lon);if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
+ const label=position.label||'Unknown location';$('currentPlace').textContent=label;$('profileLocation').textContent=label+' · Your position';$('locDetails').textContent='Server-saved position · '+lat.toFixed(4)+', '+lon.toFixed(4);$('areaTitle').textContent=label.toUpperCase();$('mapState').textContent='LIVE · YOUR POSITION';
+ const key=lat+','+lon;if(lastLocation===key)return;lastLocation=key;
+ const frame=$('mapFrame');const d=.045;frame.src='https://www.openstreetmap.org/export/embed.html?bbox='+encodeURIComponent([lon-d,lat-d,lon+d,lat+d].join(','))+'&layer=mapnik&marker='+encodeURIComponent(lat+','+lon);
+ $('mapExternal').href='https://www.openstreetmap.org/?mlat='+lat+'&mlon='+lon+'#map=13/'+lat+'/'+lon;
+ if(window.maplibregl){try{
+  if(!privateMap){const div=document.createElement('div');div.id='afPrivateMap';document.querySelector('.map-area').prepend(div);
+   privateMap=new maplibregl.Map({container:div,style:{version:8,sources:{streets:{type:'raster',tiles:['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png','https://b.tile.openstreetmap.org/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap contributors'}},layers:[{id:'streets',type:'raster',source:'streets'}]},center:[lon,lat],zoom:12.8,dragPan:false,scrollZoom:false,doubleClickZoom:false,dragRotate:false,keyboard:false});
+   privateMap._afMarker=new maplibregl.Marker({color:'#e8bc7c'}).setLngLat([lon,lat]).addTo(privateMap);
+   privateMap.on('error',()=>{if(!mapOk){$('mapFallback').classList.add('af-show-fallback');div.style.display='none'}});
+   privateMap.on('idle',()=>{mapOk=true;$('mapFallback').classList.remove('af-show-fallback')});
+  }else{privateMap.easeTo({center:[lon,lat],zoom:12.8,duration:700});const marker=privateMap._afMarker;if(marker)marker.setLngLat([lon,lat])}
+  privateMap.resize();$('mapFallback').classList.remove('af-show-fallback');return;
+ }catch(e){console.warn('Private map fallback',e)}}
+ $('mapFallback').classList.add('af-show-fallback');
+}
+function choiceUI(){const el=$('afLiveChoices');el.replaceChildren();if(!turn||turn.phase!=='collecting')return;
+ const actions=[['hold','Stay here and assess your surroundings'],['scavenge','Carefully search nearby for supplies'],['rest','Find shelter and rest'],...destinations.map((t,i)=>['travel:'+i,'Travel toward '+t[0]])];
+ for(const [key,label] of actions){const b=document.createElement('button');b.className='af-choice'+(chosen===key?' active':'');b.textContent=label;b.onclick=()=>{chosen=key;choiceUI()};el.appendChild(b)}
+ const submit=document.createElement('button');submit.className='af-live-button';submit.textContent='LOCK IN PRIVATE DECISION';submit.disabled=pending;submit.onclick=async()=>{pending=true;submit.disabled=true;try{const action={kind:chosen};if(chosen.startsWith('travel:')){const t=destinations[Number(chosen.split(':')[1])];action.target={label:t[0],lat:t[1],lon:t[2]}}await rpc('af_live_submit',{p_action:action});msg('Your decision is locked. Waiting for the other survivors.');await refresh()}catch(e){msg('Action failed: '+e.message)}finally{pending=false}};el.appendChild(submit)
+}
+function journal(events){const entries=(events||[]).slice().reverse();$('afLiveJournal').innerHTML='<div class="sub">YOUR PRIVATE CHRONICLE</div>'+ (entries.length?entries.map(e=>'<p><b>Turn '+Number(e.turn_number)+'</b> · '+esc(e.body)+'</p>').join(''):'<p>Your own consequences will appear here after the first completed turn.</p>')}
+function render(s){turn=s.turn;const pos=s.position;if(pos)mapPosition(pos);journal(s.events);$('onlineCount').textContent='· '+s.participants+' ACTIVE IN CAMPAIGN';
+ $('afLiveChoices').replaceChildren();$('chapterBook').textContent='Live campaign chronicle is shown below. Your private actions are not shared with other survivors.';
+ if(!turn){$('afLiveTitle').textContent='WAITING TO START · LIVE LOBBY';msg(s.participants+' survivors have completed their profiles. At least two active survivors are required to start.');if(name.toLowerCase()==='mikel'){
+ const b=document.createElement('button');b.className='af-live-button';b.textContent='START SHARED CAMPAIGN';b.onclick=async()=>{b.disabled=true;try{await rpc('af_live_start');await refresh()}catch(e){msg('Cannot start: '+e.message)}finally{b.disabled=false}};$('afLiveChoices').appendChild(b)}return}
+ if(lastTurn!==turn.turn_number){lastTurn=turn.turn_number;chosen='hold'}
+ $('afLiveTitle').textContent='TURN '+turn.turn_number+' · '+turn.title;$('sceneTitle').textContent=turn.title;
+ const narrative=turn.prompt+'\n\n'+(s.perspective||'');$('chapterBook').textContent=narrative;
+ const head=document.createElement('p');head.textContent=turn.prompt;$('afLiveChoices').appendChild(head);
+ const perspective=document.createElement('p');perspective.textContent=s.perspective||'';$('afLiveChoices').appendChild(perspective);
+ if(s.submitted_by_me){msg('Decision submitted · '+s.submitted+' / '+s.participants+' survivors ready. Your decision stays private.');const p=document.createElement('p');p.className='af-small';p.textContent='Waiting for the remaining active players.';$('afLiveChoices').appendChild(p)}else{msg('LIVE · '+s.submitted+' / '+s.participants+' survivors ready. Select your decision.');choiceUI()}
+}
+let busy=false;async function refresh(){if(busy||!c())return;busy=true;try{
+ const {data:{user}}=await c().auth.getUser();if(!user){document.body.classList.remove('af-live-ready');userId=null;return}
+ const {data,error}=await c().from('af_players').select('character_name,survey_complete').eq('user_id',user.id).maybeSingle();if(error||!data?.survey_complete){document.body.classList.remove('af-live-ready');return}
+ userId=user.id;name=data.character_name;document.body.classList.add('af-live-ready');
+ try{const snapshot=await rpc('af_live_snapshot');render(snapshot)}catch(e){$('afLiveTitle').textContent='MULTIPLAYER CONNECTION ERROR';msg(e.message+' · Check that the V49 SQL migration was installed.')} 
+ }catch(e){msg('Connection error: '+e.message)}finally{busy=false}}
+ setInterval(refresh,4000);setTimeout(refresh,1400);
+})();
+</script></body></html>
 
 <!-- v23: Curtis begins at an approximate location on Staten Island, NY; no street address supplied. -->
