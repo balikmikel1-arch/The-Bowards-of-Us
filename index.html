@@ -1869,6 +1869,9 @@ async function checkAdmin(){
  }catch(e){admin=false;button.style.display='none';console.error('Admin check failed',e)}
 }
 document.getElementById('sessionBtn')?.addEventListener('click',()=>setTimeout(checkAdmin,100),true);
+// Check on initial load too; the lobby can open through other code paths.
+window.addEventListener('load',()=>{checkAdmin();setTimeout(checkAdmin,1200)});
+modal.addEventListener('click',()=>{if(!modal.classList.contains('hide'))checkAdmin()},{once:true});
 button.addEventListener('click',async()=>{
  if(!admin)return;
  if(!confirm('Restart the shared campaign for everyone? This permanently erases all story turns, decisions, private journals and map positions. Character accounts and survey answers stay saved.'))return;
