@@ -1771,6 +1771,8 @@ const $=id=>document.getElementById(id), c=()=>window.afterfallSupabase;
 const panel=document.createElement('section');panel.id='afLiveOriginal';panel.innerHTML='<div class="sub">AFTERFALL · SHARED WORLD · MULTIPLAYER V52</div><h3 id="afLiveTitle">CONNECTING TO THE WORLD</h3><p id="afLiveMessage">Checking your survivor…</p><div id="afLiveChoices"></div><div class="af-journal" id="afLiveJournal"></div>';
 const stats=document.createElement('p');stats.id='afV52Survival';stats.style.cssText='font-size:12px;color:#e1c89c;margin:9px 0 12px;letter-spacing:.03em';panel.insertBefore(stats,document.getElementById('afLiveChoices'));const story=document.querySelector('.story');story.insertBefore(panel,story.firstChild);
 let userId=null, name='', turn=null, chosen=null, pending=false, lastTurn=null, lastLocation='', mapOk=false, privateMap=null;
+let afSharedContext=null;
+let afTenseState={turn:0,step:0,first:null};
 // Local actions only during the early outbreak. Long-distance travel is not a Day 1 choice.
 const localChoices={
  mikel:[['hold','Call Daniel to ask what he actually saw'],['scavenge','Stop at a nearby pharmacy for a few essentials'],['rest','Stay home and follow official updates']],
@@ -1805,30 +1807,56 @@ const afDecisionScenes=[
  ['Look for evidence that the new alert is genuine','Gather food from an accessible nearby location','Rest while others monitor the situation'],
  ['Confirm which roads are still usable before committing','Find spare supplies without entering a dangerous area','Secure your shelter and recover overnight']
  ]];
+// V63: each human survivor has their own daily decision scene.
+// Action keys are kept compatible with the existing Supabase RPC.
+const afCharacterDecisions={
+ mikel:[
+ ['Investigate why the Merrick neighborhood bulletin changed overnight','Walk to a nearby Merrick shop and ask what supplies have stopped arriving','Stay with your household and agree on a clear check-in plan'],
+ ['Call a local service desk about the strange emergency figures','Buy extra drinking water while nearby shops remain open','Take the evening to review what you actually know'],
+ ['Ask a trusted neighbor whether emergency vehicles passed your block','Collect batteries and a flashlight before stores close','Stay inside and preserve energy for tomorrow'],
+ ['Compare two versions of the Long Island travel advisory','Check the nearest accessible supply stop','Avoid unnecessary travel and monitor official notices']
+ ],
+ avery:[
+ ['Speak to the Merrick resident who claims to have seen a street closure','Check whether the local pharmacy can fill prescriptions','Stay home and make a list of reliable contacts'],
+ ['Investigate why the regional warning arrived later than the city notice','Find a portable charger or spare batteries','Rest instead of following an unverified rumor'],
+ ['Ask a shop employee what happened to a missing delivery','Stock up on shelf-stable food for the household','Remain close to home and prepare a backup plan'],
+ ['Check which Long Island bus routes still have confirmed service','Gather practical essentials before the next notice','Keep your phone charged and wait for verified information']
+ ],
+ daniel:[
+ ['Question a Canarsie shopkeeper about the unmarked vehicles','Look for a working radio in the neighborhood stores','Return to a safe indoor location and review the situation'],
+ ['Check the source of a Brooklyn hospital rumor before repeating it','Pick up water and first-aid supplies from a nearby store','Stay away from the hospital entrance until facts emerge'],
+ ['Ask a bus driver why the Canarsie route was changed','Check what is still available at the corner market','Go home and avoid an unnecessary trip across Brooklyn'],
+ ['Observe the blocked street from a lawful, safe distance','Prepare supplies for a possible local transit interruption','Remain indoors and keep your phone available']
+ ],
+ bryce:[
+ ['Ask a Brooklyn delivery rider where traffic has been redirected','Check a neighborhood store for batteries and food','Stay off the crowded avenue and reassess in the morning'],
+ ['Verify whether a forwarded video was actually filmed in Canarsie','Collect a flashlight and backup charging cable','Ignore the video until its source can be confirmed'],
+ ['Talk to a shop owner about the unexpected early closing','Find water and a few days of shelf-stable food','Keep your plans local and avoid the gathering crowd'],
+ ['Check whether the reported clinic closure affects your route','Get the essentials before the next shop shuts','Wait somewhere safe for a confirmed update']
+ ],
+ howard:[
+ ['Ask a Sunset Park commuter why the station platform was cleared','Check nearby stores for a battery-powered radio','Stay away from the station until service is confirmed'],
+ ['Compare the posted subway notice with the transit website','Buy supplies before your usual route becomes unreliable','Stay home and plan a route that avoids the closure'],
+ ['Speak with a local business owner about the missing street signs','Gather basic food and water without crossing the cordon','Avoid the restricted area and rest'],
+ ['Find out whether a ferry or train alternative is officially operating','Pick up a charger and practical travel supplies','Remain in the neighborhood until transit information stabilizes']
+ ],
+ curtis:[
+ ['Verify the Staten Island ferry advisory through an official channel','Check a nearby shop for essentials before the evening rush','Stay on Staten Island and avoid an uncertain crossing'],
+ ['Ask a neighbor what they heard about emergency calls across the harbor','Collect water and a working flashlight','Stay inside rather than travel on rumors'],
+ ['Compare the morning and afternoon ferry schedules for changes','Find shelf-stable food in your neighborhood','Keep your phone charged and conserve energy'],
+ ['Ask whether the local bus detour is confirmed by transit staff','Pick up a first-aid kit or replacement batteries','Remain close to home until the route is clarified']
+ ]
+};
 function choicesForTurn(){
  const n=Math.max(1,Number(turn?.turn_number)||1);
- const choices=[
- ['Document what the official report actually says','Visit a nearby store to check whether essentials are still available','Stay home and make a practical plan for tomorrow'],
- ['Speak with a neighbor who witnessed the emergency response','Find batteries and charge your devices while power is stable','Get some sleep before the situation becomes more disruptive'],
- ['Verify the hospital rumor using a reliable source','Check local shops for medical supplies','Keep your routine and avoid spreading unconfirmed stories'],
- ['Call the city information line for clarification','Prepare a small bag in case you need to leave','Remain indoors and watch for an official update'],
- ['Ask a transit worker about the unexpected route changes','Pick up food that will keep without refrigeration','Rest and decide whether travel is necessary tomorrow'],
- ['Compare the hospital denial with the original claim','Visit a pharmacy to ask what has actually changed','Stay close to home until you have better information'],
- ['Check whether your block has power and working communications','Collect water and practical supplies','Take time to recover while utilities are working'],
- ['Listen to the interrupted broadcast and note what was confirmed','Look for a functioning radio or spare batteries','Avoid speculation and keep your evening quiet'],
- ['Check the volunteer supply list for obvious mistakes','Help organize supplies for the next few days','Stay home and avoid unnecessary travel'],
- ['Read the new city restriction carefully','Find a safer route around the restricted area','Remain where you are until the restriction is clarified'],
- ['Contact an official source about the hospital measures','Secure basic first-aid materials','Take a break from conflicting rumors'],
- ['Verify the train disruption before planning travel','Gather necessities while nearby stores remain open','Stay off transit and rest'],
- ['Compare the two versions of the city notice','Make sure your household has a backup plan','Wait for a corrected public announcement'],
- ['Speak to someone outside the clinic without making assumptions','Check whether nearby services are still open','Return home and avoid the crowd'],
- ['Look for independent confirmation of the missing broadcast','Prepare for possible communication disruptions','Stay inside and monitor developments'],
- ['Compare the latest advisory with previous guidance','Gather what you would need for an overnight stay elsewhere','Stay put while you evaluate the new instructions']
- ];
- const c=choices[(n-1)%choices.length];
- const cycle=Math.floor((n-1)/choices.length);
- const prefix=cycle?'On day '+n+', ':'';
- return [['hold',prefix+c[0]],['scavenge',prefix+c[1]],['rest',prefix+c[2]]];
+ const who=String(name||'').trim().toLowerCase();
+ const sets=afCharacterDecisions[who]||afCharacterDecisions.mikel;
+ const dayIndex=(n-1)%sets.length;
+ const cycle=Math.floor((n-1)/sets.length);
+ const base=sets[dayIndex];
+ // Later days get a new context rather than pretending the earlier incident is happening again.
+ const later=cycle?`After ${cycle*sets.length} days of changing conditions, `:'';
+ return [['hold',later+base[0]],['scavenge',later+base[1]],['rest',later+base[2]]];
 }
 
 const esc=x=>String(x??'').replace(/[&<>"']/g,z=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[z]));
@@ -1851,10 +1879,60 @@ function mapPosition(position){
  }catch(e){console.warn('Private map fallback',e)}}
  $('mapFallback').classList.add('af-show-fallback');
 }
-function choiceUI(){const el=$('afLiveChoices');el.querySelectorAll('.af-choice,.af-live-button,.af-choice-error').forEach(x=>x.remove());if(!turn||turn.phase!=='collecting')return;
- const actions=choicesForTurn();
- for(const [key,label] of actions){const b=document.createElement('button');b.className='af-choice'+(chosen===key?' active':'');b.textContent=label;b.onclick=()=>{chosen=key;choiceUI()};el.appendChild(b)}
- const submit=document.createElement('button');submit.className='af-live-button';submit.textContent='LOCK IN PRIVATE DECISION';submit.disabled=pending||!chosen;submit.onclick=async()=>{pending=true;submit.disabled=true;try{if(!chosen)throw new Error('Choose an action first.');const action={kind:chosen};await rpc('af_live_submit',{p_action:action});msg('Your decision is locked. Waiting for the other survivors.');await refresh()}catch(e){msg('Action failed: '+e.message);const error=document.createElement('p');error.className='af-small af-choice-error';error.style.color='#ffb5a5';error.textContent='Could not lock decision: '+e.message;el.appendChild(error)}finally{pending=false}};el.appendChild(submit)
+
+// Tense decisions are short beats inside one shared turn; only the final action is submitted.
+function afTenseScene(){
+ const n=Math.max(1,Number(turn?.turn_number)||1);
+ if(n<6||n%6!==0)return null;
+ const who=String(name||'').toLowerCase();
+ const place=({mikel:'a darkened neighborhood street in Merrick',avery:'a crowded shop entrance in Merrick',daniel:'a blocked crossing in Canarsie',bryce:'a narrow Brooklyn side street',howard:'a stalled subway entrance in Sunset Park',curtis:'a ferry terminal exit on Staten Island'})[who]||'the street';
+ return {place,opening:`You are near ${place} when a sudden crash makes everyone stop. A frightened stranger pushes through the crowd. Something heavy strikes a metal shutter behind you. Nobody can tell yet whether this is an accident or a threat.`,beats:[
+ ['Step away from the crowd and look for an exit','Ask the stranger what happened without approaching','Move behind solid cover and stay quiet'],
+ ['Leave the area using the clearest route','Look for a safe way to help without closing the distance','Stay sheltered until the immediate danger passes']
+ ]};
+}
+function choiceUI(){
+ const el=$('afLiveChoices');
+ el.querySelectorAll('.af-choice,.af-live-button,.af-choice-error,.af-tense-text').forEach(x=>x.remove());
+ if(!turn||turn.phase!=='collecting')return;
+ const n=Number(turn.turn_number)||1;
+ if(afTenseState.turn!==n)afTenseState={turn:n,step:0,first:null};
+ const tense=afTenseScene();
+ let actions;
+ if(tense){
+  const p=document.createElement('p');p.className='af-tense-text';
+  p.style.whiteSpace='pre-line';p.style.lineHeight='1.8';
+  p.textContent=afTenseState.step===0?
+   `URGENT SCENE · MINUTES, NOT A FULL DAY\n\n${tense.opening}\n\nYou have only seconds to respond.`:
+   `A FEW MINUTES LATER\n\n${afTenseState.first===0?'You pull back as people hurry past. A loose sign falls into the space you just left.':afTenseState.first===1?'The stranger tries to speak, but the noise drowns out half the words. You cannot confirm what caused the commotion.':'From behind cover, you hear footsteps running away and someone calling for help.'}\n\nThe immediate danger has not completely passed. Choose how to finish this encounter.`;
+  el.appendChild(p);
+  actions=tense.beats[afTenseState.step].map((v,i)=>[['hold','scavenge','rest'][i],v]);
+ }else actions=choicesForTurn();
+ for(const [key,label] of actions){
+  const b=document.createElement('button');b.className='af-choice'+(chosen===key?' active':'');b.textContent=label;
+  b.onclick=()=>{chosen=key;choiceUI()};el.appendChild(b);
+ }
+ const submit=document.createElement('button');submit.className='af-live-button';
+ submit.textContent=tense&&afTenseState.step===0?'CONTINUE · A FEW SECONDS PASS':'LOCK IN PRIVATE DECISION';
+ submit.disabled=pending||!chosen;
+ submit.onclick=async()=>{
+  if(!chosen)return;
+  if(tense&&afTenseState.step===0){
+   afTenseState.first=['hold','scavenge','rest'].indexOf(chosen);
+   afTenseState.step=1;chosen=null;choiceUI();return;
+  }
+  pending=true;submit.disabled=true;
+  try{
+   // Existing RPC accepts only the broad action kind. Fine-grained outcomes require server changes.
+   await rpc('af_live_submit',{p_action:{kind:chosen}});
+   msg('Your decision is locked. Waiting for the other survivors.');await refresh();
+  }catch(e){
+   msg('Action failed: '+e.message);
+   const error=document.createElement('p');error.className='af-small af-choice-error';error.style.color='#ffb5a5';
+   error.textContent='Could not lock decision: '+e.message;el.appendChild(error);
+  }finally{pending=false}
+ };
+ el.appendChild(submit);
 }
 
 // V57: long-form private chapter before each decision. Scripted, not generative AI.
@@ -1882,8 +1960,9 @@ function afStoryChapter(turn,survivor,location,events){
  const place=location||'New York';
  const who=String(survivor||'Survivor');
  const previous=(events||[]).filter(e=>Number(e.turn_number)<n).slice(-1).map(e=>String(e.body||'')).filter(Boolean);
- const opener=n===1?`You begin the day in ${place}. It feels ordinary until the first reports reach you.`:`You wake to a different city than yesterday. Your last decision has already been made; today brings a new problem.`;
- return [`DAY ${n} · ${place.toUpperCase()}`,`${who.toUpperCase()} · ${episode[0]}`,opener,episode[1],episode[2],episode[3],...(previous.length?['WHAT CARRIES FORWARD\n'+previous[0]]:[]),'The situation has moved forward. Decide what matters to you today.'].join('\n\n');
+ const escalation=n>16?`The old incident has become part of a larger investigation. This is day ${n}, and the public response is no longer what it was when the first reports appeared. A new witness challenges an earlier account; the people around you must decide what evidence they trust.`:'';
+ const opener=n===1?`Morning arrives in ${place}. The first reports begin to circulate.`:`In ${place}, the consequences of the previous day are still unfolding. Today's events are different.`;
+ return [`DAY ${n} · ${place.toUpperCase()}`,`${who.toUpperCase()} · ${n>16?'FOLLOW-UP: ':''}${episode[0]}`,opener,...(escalation?[escalation]:[]),episode[1],episode[2],episode[3],...(previous.length?['WHAT CARRIES FORWARD\n'+previous[0]]:[])].join('\n\n');
 }
 
 const afNewsFallback={headline:'Official information remains limited',body:'Local services continue to operate. Officials ask residents to verify reports before sharing them.'};
@@ -1916,16 +1995,6 @@ function render(s){turn=s.turn;const pos=s.position;if(pos)mapPosition(pos);jour
  const b=document.createElement('button');b.className='af-live-button';b.textContent='START SHARED CAMPAIGN';b.onclick=async()=>{b.disabled=true;try{await rpc('af_live_start');await refresh()}catch(e){msg('Cannot start: '+e.message)}finally{b.disabled=false}};$('afLiveChoices').appendChild(b)}return}
  if(lastTurn!==turn.turn_number){lastTurn=turn.turn_number;chosen=null}
  $('afLiveTitle').textContent='TURN '+turn.turn_number+' · '+turn.title;$('sceneTitle').textContent=turn.title;
- const nameKey=String(name||'').toLowerCase();
- const introByName={
- mikel:'Merrick, New York. It is an ordinary evening. A car rolls past the house, and somewhere a television plays too loudly. Your phone lights up with a message from Daniel about unusual ambulance traffic in Brooklyn. You have no reason yet to believe this night will change your life.',
- avery:'Merrick, New York. The neighborhood looks normal: porch lights, passing cars, the familiar hum of life after dark. A vague alert appears on your phone, but nobody nearby seems particularly concerned.',
- daniel:'Canarsie, Brooklyn. You step outside and hear another ambulance passing several blocks away. The shops are still open and traffic is moving. You have seen enough to be curious, not enough to understand what is happening.',
- bryce:'Brooklyn, New York. The evening traffic crawls along, a shopkeeper pulls down a gate at the usual hour, and an unverified story about a hospital begins circulating through your messages.',
- howard:'Sunset Park, Brooklyn. Trains are still running, and the streets carry their usual mix of conversations and traffic. A regional notice appears on your phone, vague enough to be easy to dismiss.',
- curtis:'Staten Island, New York. The neighborhood is quiet, and the city across the harbor feels far away. A news notification mentions emergency calls in another borough. Nothing around you looks different.'
- };
-let afSharedContext = null;
  const story=afWorldStory(turn,name,pos?.label,s.events,afSharedContext);
  $('chapterBook').textContent=story;
  $('chapterBook').style.whiteSpace='pre-line';
@@ -1939,7 +2008,7 @@ let busy=false;async function refresh(){if(busy||!c())return;busy=true;try{
  const {data:{user}}=await c().auth.getUser();if(!user){document.body.classList.remove('af-live-ready');userId=null;return}
  const {data,error}=await c().from('af_players').select('character_name,survey_complete').eq('user_id',user.id).maybeSingle();if(error||!data?.survey_complete){document.body.classList.remove('af-live-ready');return}
  userId=user.id;name=data.character_name;document.body.classList.add('af-live-ready');
- try{const snapshot=await rpc('af_live_snapshot');try{afSharedContext=await rpc('af_story_context')}catch(contextError){afSharedContext=null;console.warn('Shared story unavailable:',contextError.message)}render(snapshot)}catch(e){$('afLiveTitle').textContent='MULTIPLAYER CONNECTION ERROR';msg(e.message+' · Check that the V49 SQL migration was installed.')} 
+ try{const snapshot=await rpc('af_live_snapshot');try{afSharedContext=await rpc('af_story_context')}catch(contextError){afSharedContext=null;console.warn('Shared story unavailable:',contextError.message)}render(snapshot)}catch(e){$('afLiveTitle').textContent='MULTIPLAYER CONNECTION ERROR';msg(e.message+' · Copy this exact error for troubleshooting.')} 
  }catch(e){msg('Connection error: '+e.message)}finally{busy=false}}
  setInterval(refresh,4000);setTimeout(refresh,1400);
 })();
