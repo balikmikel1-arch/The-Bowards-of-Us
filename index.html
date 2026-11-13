@@ -1797,6 +1797,44 @@ let busy=false;async function refresh(){if(busy||!c())return;busy=true;try{
  }catch(e){msg('Connection error: '+e.message)}finally{busy=false}}
  setInterval(refresh,4000);setTimeout(refresh,1400);
 })();
+</script><style id="af-synced-admin-style">body.af-live-ready #sessionBtn{display:inline-flex!important}#modalback{z-index:10050!important}#afAdminStatus{font-size:11px;line-height:1.6;color:#c5d6d9;margin:10px 0}#modalback .modal{max-height:90vh;overflow:auto}</style><script id="af-synced-admin">
+(()=>{'use strict';
+const names=['Mikel','Avery','Daniel','Bryce','Howard','Curtis','Nick'];
+const statuses=['active','npc','inactive'];
+const btn=document.getElementById('sessionBtn'),modal=document.getElementById('modalback'),rows=document.getElementById('sessionRows'),apply=document.getElementById('applySession');
+if(!btn||!modal||!rows||!apply)return;
+let currentUser=null,isAdmin=false,roster=null,loading=false,dirty=false;
+const note=document.createElement('p');note.id='afAdminStatus';rows.before(note);
+function client(){return window.afterfallSupabase}
+function message(t){note.textContent=t}
+function paint(){
+ btn.textContent=isAdmin?'⚙ ADMIN · PLAYERS':'⚙ PLAYERS';
+ rows.replaceChildren();
+ for(const name of names){const line=document.createElement('div');line.className='session-row';const title=document.createElement('strong');title.textContent=name;line.appendChild(title);
+ const sel=document.createElement('select');sel.className='select';sel.dataset.character=name;
+ for(const status of statuses){const opt=document.createElement('option');opt.value=status;opt.textContent=status==='npc'?'Temporary NPC':status==='inactive'?'Inactive':'Active player';sel.appendChild(opt)}
+ sel.value=roster?.[name]||'active';sel.disabled=!isAdmin||name==='Mikel';sel.addEventListener('change',()=>{dirty=true;message('Unsaved changes. Click Save synced settings.')});line.appendChild(sel);rows.appendChild(line)}
+ apply.style.display=isAdmin?'block':'none';apply.textContent='SAVE SYNCED SETTINGS';
+ if(!dirty)message(isAdmin?'These assignments are saved in Supabase and shared across accounts.':'Read-only roster. Only the authenticated Mikel account can edit.');
+}
+async function load(force=false){const c=client();if(!c||loading||dirty&&!force)return;loading=true;try{
+ const {data:{user},error:authError}=await c.auth.getUser();if(authError)throw authError;
+ if(!user){currentUser=null;isAdmin=false;roster=null;return}
+ const {data:me,error:meError}=await c.from('af_players').select('character_name').eq('user_id',user.id).maybeSingle();if(meError)throw meError;
+ currentUser=user.id;isAdmin=me?.character_name?.trim().toLowerCase()==='mikel';
+ const {data,error}=await c.from('af_session_roster').select('character_name,mode');if(error)throw error;
+ roster=Object.fromEntries((data||[]).map(r=>[r.character_name,r.mode]));
+ if(!dirty||force){dirty=false;paint()}
+ }catch(e){message('Sync unavailable: '+e.message);console.error('AFTERFALL roster',e)}finally{loading=false}}
+btn.addEventListener('click',async e=>{e.stopImmediatePropagation();modal.classList.remove('hide');dirty=false;message('Loading synced roster…');await load(true)},true);
+apply.addEventListener('click',async e=>{e.stopImmediatePropagation();if(!isAdmin||!currentUser){message('Only Mikel can save changes.');return}apply.disabled=true;
+ try{const payload=[...rows.querySelectorAll('select[data-character]')].map(el=>({character_name:el.dataset.character,mode:el.dataset.character==='Mikel'?'active':el.value}));
+ const {error}=await client().from('af_session_roster').upsert(payload,{onConflict:'character_name'});if(error)throw error;
+ dirty=false;message('Saved to Supabase. All players will see the new roster.');await load(true);
+ }catch(err){message('Save failed: '+err.message)}finally{apply.disabled=false}},true);
+setInterval(()=>{if(!modal.classList.contains('hide'))load()},5000);
+setTimeout(load,1700);
+})();
 </script></body></html>
 
 <!-- v23: Curtis begins at an approximate location on Staten Island, NY; no street address supplied. -->
