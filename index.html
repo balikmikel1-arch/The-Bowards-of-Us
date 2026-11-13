@@ -763,6 +763,26 @@ const sceneQuestions=[
  {kind:'multiple',title:'Something is different',prompt:'Later, an ambulance slows at an intersection while two police cars turn onto a side street. A few people look up; most keep walking. What do you do?',options:['Observe from a safe distance without interfering','Ask a nearby transit worker whether the street or station is affected','Leave the area and contact the others']},
  {kind:'multiple',title:'Where to spend the night',prompt:'It is getting late. The group needs to decide whether to stay together or head to familiar places. There is still no proof of a citywide emergency. What is your choice?',options:['Stay together at a familiar indoor location','Head home and agree on a check-in time','Split up for practical reasons but keep phones charged and on']}
 ];
+// Character-specific private opening decisions. No survivor sees their own name as a third party.
+const openingPersonal={
+ Mikel:{title:'A message from Canarsie',prompt:'Your phone buzzes in Merrick. Daniel asks whether you have noticed unusual ambulance traffic. The neighborhood outside still looks normal. What do you do?',options:['Call Daniel and ask what he witnessed','Check local reports before responding','Reply that Merrick seems quiet and keep your plans']},
+ Avery:{title:'A quiet street in Merrick',prompt:'A regional alert flashes on your phone. A car passes and neighbors are still at home. You have no direct evidence of an emergency. What do you do?',options:['Message Mikel to compare what you have heard','Check official alerts and transit notices','Ignore the vague alert for now and carry on']},
+ Daniel:{title:'Sirens in Canarsie',prompt:'You are in Canarsie when another ambulance passes. You have heard an unconfirmed rumor about a crowded emergency department. You have not received a message from yourself. What do you do?',options:['Text the group about what you personally noticed','Walk to a safer public place and observe','Check the news before telling anyone there is a crisis']},
+ Bryce:{title:'A strange evening in Brooklyn',prompt:'Traffic moves normally in Canarsie, but sirens seem more frequent than usual. A friend shares an unverified hospital rumor. What do you do?',options:['Ask a nearby shopkeeper what they have seen','Contact Daniel to compare reports','Continue your plans while keeping your phone charged']},
+ Howard:{title:'A warning in Sunset Park',prompt:'In Sunset Park, you hear a train in the distance as a vague regional emergency alert appears. Nothing on your block seems out of place. What do you do?',options:['Check subway service and official alerts','Call someone you trust to compare reports','Stay nearby and watch for reliable information']},
+ Curtis:{title:'Across the harbor',prompt:'Staten Island is calm tonight. Your phone shows a regional alert about unusual emergency calls elsewhere in the city. What do you do?',options:['Check whether ferry and bus service are affected','Message the group to ask what they know','Stay home and monitor local updates']}
+};
+function questionFor(index,personIndex){
+ const base=sceneQuestions[index%sceneQuestions.length];
+ const name=people[personIndex]?.name;
+ if(index===0&&openingPersonal[name])return {...base,...openingPersonal[name]};
+ if(personIndex==null)return base;
+ const loc=people[personIndex]?.loc||'your neighborhood';
+ if(index===1)return {...base,prompt:`In ${loc}, ordinary life continues despite scattered rumors. What do you do?`,options:['Check local transit and public advisories','Contact someone you trust nearby','Keep your usual plans while staying alert']};
+ if(index===2)return {...base,prompt:`You receive conflicting reports about hospitals and emergency services near ${loc}. None is verified. What do you do?`,options:['Verify the report with an official source','Ask a nearby contact for first-hand details','Avoid spreading rumors and stay observant']};
+ return base;
+}
+window.afPersonalQuestion=(index,personIndex)=>questionFor(index,personIndex);
 let gateIndex=0,gatePhase='choice',gateAnswers={},gateReady={},gateDemoRemote=false;
 const gateKey='afterfall_gate_preview_v1';
 try{const g=JSON.parse(localStorage.getItem(gateKey));if(g&&g.version===1){gateIndex=g.index||0;gatePhase=g.phase||'choice';gateAnswers=g.answers||{};gateReady=g.ready||{};gateDemoRemote=!!g.demo}}catch(e){}
@@ -773,7 +793,7 @@ function choiceRequired(){return gatePhase==='choice'}
 function allAnswers(){return activeIndices().every(i=>typeof gateAnswers[i]==='string'&&gateAnswers[i].trim().length>0)}
 function allReady(){return activeIndices().every(i=>gateReady[i]===true)}
 function updateGate(){
- const own=gateOwn(),active=activeIndices(),q=sceneQuestions[gateIndex%sceneQuestions.length];
+ const own=gateOwn(),active=activeIndices(),q=questionFor(gateIndex,own);
  const status=active.filter(i=>gateReady[i]).length;
  $('#gateStatus').textContent=`${status} / ${active.length} READY`;
  $('#readyRoster').innerHTML=active.map(i=>`<span class="ready-person ${gateReady[i]?'done':'wait'}">${safe(people[i].name)} · ${gateReady[i]?'READY':'WAITING'}</span>`).join('')+(active.length?'':'<span class="gate-help">No active players in this session.</span>');
@@ -804,7 +824,7 @@ function maybeReadyPhase(){
 }
 $('#submitChoice').onclick=()=>{
  const own=gateOwn();if(own===null||!activeIndices().includes(own)||gateAnswers[own])return;
- const q=sceneQuestions[gateIndex%sceneQuestions.length],picked=document.querySelector('input[name="storyChoice"]:checked');
+ const q=questionFor(gateIndex,own),picked=document.querySelector('input[name="storyChoice"]:checked');
  const written=$('#choiceAnswer').value.trim();
  if(q.kind==='multiple'&&!picked){$('#choiceFeedback').textContent='Choose an option first.';return}
  if(q.kind==='short'&&!written){$('#choiceFeedback').textContent='Write your answer before continuing.';return}
@@ -1126,7 +1146,7 @@ resolveAfterfallSpawns();
  // A character's own choices are contextualized using their saved emotional and cognitive attributes.
  if(false&&adminPreview()&&Number(claimed)===0){const badge=document.getElementById('claimedBadge');if(badge)badge.textContent='PLAYING: MIKEL · ADMIN PREVIEW';}
  const originalUpdate=updateGate;
- updateGate=function(){originalUpdate();if(claimed===null||!allowed(claimed))return;const q=sceneQuestions[gateIndex%sceneQuestions.length];const a=profiles[claimed];const el=document.getElementById('choicePrompt');if(!el||!q)return;const fear=a?.[OLD_QUESTION_INDICES.indexOf(54)],pressure=a?.[OLD_QUESTION_INDICES.indexOf(53)];el.textContent=q.prompt+(fear?' Your response is influenced by what unsettles you: '+fear.slice(0,95)+'.':'')+(pressure?' Under pressure, you tend to '+pressure.slice(0,95)+'.':'');};
+ updateGate=function(){originalUpdate();if(claimed===null||!allowed(claimed))return;const q=window.afPersonalQuestion?.(gateIndex,Number(claimed))||sceneQuestions[gateIndex%sceneQuestions.length];const a=profiles[claimed];const el=document.getElementById('choicePrompt');if(!el||!q)return;const fear=a?.[OLD_QUESTION_INDICES.indexOf(54)],pressure=a?.[OLD_QUESTION_INDICES.indexOf(53)];el.textContent=q.prompt+(fear?' Your response is influenced by what unsettles you: '+fear.slice(0,95)+'.':'')+(pressure?' Under pressure, you tend to '+pressure.slice(0,95)+'.':'');};
  updateGate();
 })();
 </script><style id="v29-admin-preview-style">#mikelAdminPreview{display:block;width:100%;margin:16px 0 0;padding:14px 16px;border:1px solid #d0ad71;border-radius:12px;background:#292c2a;color:#f3dbab;font-weight:750;cursor:pointer}#mikelAdminPreview:hover{background:#3b392e}</style><style id="v28-admin-npc">
