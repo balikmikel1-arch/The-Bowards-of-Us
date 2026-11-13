@@ -1780,11 +1780,39 @@ const localChoices={
  howard:[['hold','Check the MTA service alerts and local advisories'],['scavenge','Pick up batteries and basic groceries nearby'],['rest','Stay inside and call family']],
  curtis:[['hold','Check ferry and bus notices before making plans'],['scavenge','Visit a neighborhood store for supplies'],['rest','Stay home and monitor reports across the harbor']]
 };
+// V59: scene-specific decision wording; no two adjacent turns reuse the same options.
+// Server currently accepts only hold/scavenge/rest. These are narrative labels,
+// NOT new action types; deeper unique consequences require a server migration.
+const afDecisionScenes=[
+ [
+ ['Verify the strange alert with someone you trust','Pick up basic supplies before stores close','Finish your evening at home and watch the news'],
+ ['Compare the first reports with an official city source','Get batteries and bottled water at a nearby shop','Turn off the rumors and get some sleep'],
+ ['Ask a neighbor what they witnessed firsthand','Check the pharmacy for first-aid essentials','Stay indoors while emergency vehicles pass'],
+ ['Contact family to agree on a check-in plan','Buy shelf-stable food before the weekend','Take a quiet evening to recover and reassess']
+ ],[
+ ['Check whether the reported hospital incident is confirmed','Replace used supplies at an open store','Keep your normal routine while watching for changes'],
+ ['Call a friend who lives closer to the reported incident','Pick up a portable charger and spare batteries','Avoid crowded streets and rest at home'],
+ ['Read the full emergency advisory instead of the headline','Stock up on drinking water before a possible delay','Stay put until the transit situation becomes clearer'],
+ ['Ask a local worker whether services are changing','Find food that will last if deliveries slow','Recover your energy before making another plan']
+ ],[
+ ['Compare two conflicting broadcasts and note what matches','Search an open store for medical supplies','Shelter inside during the latest advisory'],
+ ['Check on someone who has stopped answering messages','Find a safe source of clean water nearby','Stay off the streets and conserve energy'],
+ ['Investigate a suspicious change in the posted notice','Collect useful batteries and tools from a local shop','Wait for daylight before acting on a rumor'],
+ ['Share only what you personally verified with the group','Gather food while the neighborhood is calm','Sleep in a secure room and prepare for tomorrow']
+ ],[
+ ['Ask why the evacuation map was quietly revised','Check a nearby supply point for essentials','Remain sheltered until the warning expires'],
+ ['Contact a trusted person about the interrupted broadcast','Search for clean water and basic medicine','Take cover and avoid unnecessary movement'],
+ ['Look for evidence that the new alert is genuine','Gather food from an accessible nearby location','Rest while others monitor the situation'],
+ ['Confirm which roads are still usable before committing','Find spare supplies without entering a dangerous area','Secure your shelter and recover overnight']
+ ]];
 function choicesForTurn(){
- const day=Math.floor((Math.max(1,Number(turn?.turn_number)||1)-1)/4)+1;
- if(day<=3)return localChoices[String(name).toLowerCase()]||[['hold','Ask someone nearby what they have actually seen'],['scavenge','Buy a few essentials at a local shop'],['rest','Stay home and check official advisories']];
- if(day<=7)return [['hold','Stay nearby and check official updates before moving'],['scavenge','Find food, water, or first aid supplies locally'],['rest','Find a safe place to recover and monitor the situation']];
- return [['hold','Observe the area and plan your next move'],['scavenge','Search nearby for useful supplies'],['rest','Rest in the safest shelter you can find']];
+ const n=Math.max(1,Number(turn?.turn_number)||1),day=Math.floor((n-1)/4)+1;
+ const scene=afDecisionScenes[Math.min(afDecisionScenes.length-1,Math.floor((n-1)/4))][(n-1)%4];
+ // Character-specific first turn preserves each survivor's personal opening.
+ if(n===1)return localChoices[String(name).toLowerCase()]||[['hold',scene[0]],['scavenge',scene[1]],['rest',scene[2]]];
+ // Later turns use a rotating set of distinct scenes, not the same generic menu.
+ if(n>16){const cycle=Math.floor((n-1)/16),suffix=['at this stage of the crisis','given what happened yesterday','before the next official update','with your current supplies'][cycle%4];return [['hold',scene[0]+' '+suffix],['scavenge',scene[1]+' '+suffix],['rest',scene[2]+' '+suffix]]}
+ return [['hold',scene[0]],['scavenge',scene[1]],['rest',scene[2]]];
 }
 
 const esc=x=>String(x??'').replace(/[&<>"']/g,z=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[z]));
@@ -1807,10 +1835,85 @@ function mapPosition(position){
  }catch(e){console.warn('Private map fallback',e)}}
  $('mapFallback').classList.add('af-show-fallback');
 }
-function choiceUI(){const el=$('afLiveChoices');el.replaceChildren();if(!turn||turn.phase!=='collecting')return;
+function choiceUI(){const el=$('afLiveChoices');el.querySelectorAll('.af-choice,.af-live-button,.af-choice-error').forEach(x=>x.remove());if(!turn||turn.phase!=='collecting')return;
  const actions=choicesForTurn();
  for(const [key,label] of actions){const b=document.createElement('button');b.className='af-choice'+(chosen===key?' active':'');b.textContent=label;b.onclick=()=>{chosen=key;choiceUI()};el.appendChild(b)}
- const submit=document.createElement('button');submit.className='af-live-button';submit.textContent='LOCK IN PRIVATE DECISION';submit.disabled=pending||!chosen;submit.onclick=async()=>{pending=true;submit.disabled=true;try{if(!chosen)throw new Error('Choose an action first.');const action={kind:chosen};await rpc('af_live_submit',{p_action:action});msg('Your decision is locked. Waiting for the other survivors.');await refresh()}catch(e){msg('Action failed: '+e.message);const error=document.createElement('p');error.className='af-small';error.style.color='#ffb5a5';error.textContent='Could not lock decision: '+e.message;el.appendChild(error)}finally{pending=false}};el.appendChild(submit)
+ const submit=document.createElement('button');submit.className='af-live-button';submit.textContent='LOCK IN PRIVATE DECISION';submit.disabled=pending||!chosen;submit.onclick=async()=>{pending=true;submit.disabled=true;try{if(!chosen)throw new Error('Choose an action first.');const action={kind:chosen};await rpc('af_live_submit',{p_action:action});msg('Your decision is locked. Waiting for the other survivors.');await refresh()}catch(e){msg('Action failed: '+e.message);const error=document.createElement('p');error.className='af-small af-choice-error';error.style.color='#ffb5a5';error.textContent='Could not lock decision: '+e.message;el.appendChild(error)}finally{pending=false}};el.appendChild(submit)
+}
+
+// V57: long-form private chapter before each decision. Scripted, not generative AI.
+function afStoryChapter(turn, survivor, location, events){
+ const t=Math.max(1,Number(turn?.turn_number)||1),day=Math.floor((t-1)/4)+1;
+ const who=String(survivor||'').toLowerCase();
+ const place=location||({mikel:'Merrick, Long Island',avery:'Merrick, Long Island',daniel:'Canarsie, Brooklyn',bryce:'Brooklyn',howard:'Sunset Park, Brooklyn',curtis:'Staten Island'}[who]||'New York');
+ const people={
+ mikel:{home:'The house is familiar: the television in the next room, a half-finished drink on the table, the quiet rhythm of an ordinary evening.',contact:'Daniel sends a short message about the ambulances he has noticed in Brooklyn. You read it twice. He sounds concerned, but he is not claiming to know what is happening.',detail:'A passing car slows for a turn at the end of the block. Nothing outside suggests you need to leave Merrick tonight.'},
+ avery:{home:'Porch lights flicker on across the neighborhood. Someone is walking a dog, and two neighbors talk beside a parked car.',contact:'A vague regional notification appears on your phone. It mentions increased emergency calls, without explaining what caused them.',detail:'You wonder whether Mikel has heard anything more concrete. For now, the streets around you look unchanged.'},
+ daniel:{home:'The shops along the avenue are still doing business. A bus pulls away from the curb, and people wait impatiently at the crossing.',contact:'Another ambulance passes, heading somewhere beyond your view. A rumor about a hospital appears in a group chat, but nobody can name a reliable source.',detail:'You could warn your friends about what you actually saw. Anything beyond that would be a guess.'},
+ bryce:{home:'The evening is busy in Brooklyn. Delivery bikes pass storefronts, and a shopkeeper begins stacking boxes near the entrance.',contact:'A friend forwards a shaky video with a dramatic caption. It is impossible to tell where it was filmed, or even when.',detail:'The person behind the counter seems more worried about closing on time than the video. That makes the rumor easier to dismiss.'},
+ howard:{home:'The low rumble of a train carries through Sunset Park. The station is open, and commuters are still making their way home.',contact:'Your phone shows a citywide advisory asking residents to follow official updates. It gives few details.',detail:'Nothing says the trains will stop tonight. Still, you think about how quickly a normal commute can become a problem.'},
+ curtis:{home:'The evening on Staten Island feels removed from the noise of the other boroughs. Cars pass and the neighborhood settles into its usual routine.',contact:'A news alert mentions a rise in emergency calls across the harbor. It does not mention your neighborhood.',detail:'You check the time and think about the ferry and buses. If anything changes, you would rather hear it from a reliable source.'}
+ };
+ const p=people[who]||{home:'The neighborhood looks ordinary despite a few worrying reports.',contact:'A message about unusual emergency activity appears on your phone.',detail:'You have no reliable reason to assume the worst.'};
+ const stage=day<=3?[
+ 'The city has not stopped. Transit is running, stores are open, and most people have ordinary plans for tomorrow. Nobody you know has a complete picture of the reports circulating online.',
+ 'The news uses careful language. Officials say they are investigating isolated incidents and urge people not to spread unverified claims. A few people seem nervous; many are annoyed by the interruption.',
+ 'The unsettling part is not what you can see. It is the distance between the confident voices on television and the uncertainty in the messages arriving on your phone.'
+ ]:day<=7?[
+ 'There are more official notices now. A few services are delayed and some public places have changed their hours, but most neighborhoods are still functioning.',
+ 'People disagree about what the warnings mean. Some stock up on essentials; others insist the situation is being exaggerated. A single rumor can travel farther than any confirmed report.',
+ 'Whatever you choose, you are making a decision with incomplete information. It is too early to know which precautions will matter.'
+ ]:day<=14?[
+ 'The disruption is no longer confined to rumors. Some routes are suspended, certain blocks are cordoned off, and people are learning which sources they can trust.',
+ 'Elsewhere, ordinary life continues in fragments. A grocery store opens for a few hours. A train runs on a reduced schedule. Neighbors argue about whether to stay or leave.',
+ 'You cannot solve the whole city. You can only decide what is reasonable where you are, with the supplies and information you have.'
+ ]:[
+ 'Weeks of uncertainty have changed the routines people once took for granted. The effects vary sharply from block to block: some communities organize, while others struggle with shortages and fear.',
+ 'The streets are not suddenly ancient ruins. There are fresh barricades, hurried repairs, abandoned errands, and signs that people have been making difficult decisions recently.',
+ 'Every choice now has a history behind it. What you know, whom you trust, and what you have saved will matter more than any rumor.'
+ ];
+ const prior=(events||[]).slice(-2).map(e=>String(e.body||'').trim()).filter(Boolean);
+ return [
+ `DAY ${day} · ${place.toUpperCase()}`,
+ `PRIVATE CHAPTER · ${String(survivor||'Survivor').toUpperCase()}`,
+ p.home,
+ p.contact,
+ p.detail,
+ ...stage,
+ ...(prior.length?['What happened earlier still sits with you: '+prior.join(' ')]:[]),
+ 'For the moment, there is no perfect answer. You have a little time to think, and then you will have to choose what to do next.'
+ ].join('\n\n');
+}
+// V58: consistent world news and shared-group chapters come from Supabase.
+let afSharedContext=null;
+const afNewsFallback={headline:'Official information remains limited',body:'Local services continue to operate. Officials ask residents to verify reports before sharing them.'};
+const afTwistChapters={
+ 4:['THE WRONG ADDRESS','A public notice names a hospital as the source of a disturbing incident. Hours later, the notice is quietly corrected. The original address was a different facility entirely. Nobody explains why the first version appeared.'],
+ 8:['THE UNANSWERED CALL','A routine emergency broadcast ends with a brief, unscripted voice asking whether the line is still open. The station resumes its usual programming without acknowledging the interruption.'],
+ 16:['THE MISSING LIST','An official evacuation notice contains a list of streets that have supposedly been cleared. A local resident calls into the news and insists people are still living on one of them. The presenter cuts to another story.'],
+ 28:['THE SECOND SIGNAL','A previously trusted emergency frequency begins repeating instructions that conflict with the latest city notice. Someone is using the same identifying call sign. There is no easy way to tell which message is genuine.'],
+ 44:['THE RETURN','A message arrives from a location the authorities said had been evacuated. It contains a mundane detail that only someone familiar with the neighborhood would know.']
+};
+function afSharedChapter(turn,ctx){
+ const n=Math.max(1,Number(turn?.turn_number)||1),day=Math.floor((n-1)/4)+1;
+ const members=(ctx?.group?.members||[]).slice().sort();
+ const groupName=ctx?.group?.name||'The group';
+ const news=ctx?.news||afNewsFallback;
+ const twist=afTwistChapters[n];
+ const pacing=day<=3?'The city is still moving. Shops open, transit operates, and the evening sounds ordinary. People are sharing rumors, but few have firsthand evidence.':day<=7?'Some services are delayed and officials are issuing narrower warnings. There is anxiety, but daily life has not stopped.':day<=14?'Closures and shortages are uneven. One street may be quiet while the next is cordoned off. The group cannot assume every report applies where they stand.':'The crisis has divided the city into pockets of routine and disruption. Familiar systems no longer work equally well everywhere.';
+ return [`DAY ${day} · SHARED CHAPTER`,`${groupName.toUpperCase()} · ${members.join(', ')}`,
+ 'You are together for this part of the story. Whatever happens in this scene happens to all of you, at the same moment. Nobody in the group receives a conflicting version of the event.',
+ pacing,`PUBLIC BROADCAST · ${news.headline}\n${news.body}`,
+ ...(twist?[`${twist[0]}\n${twist[1]}`]:[]),
+ 'You exchange a look. Each person may still make a private decision, but you are facing the same situation.'].join('\n\n');
+}
+function afWorldStory(turn,survivor,location,events,ctx){
+ const news=ctx?.news||afNewsFallback;
+ const base=ctx?.group?.members?.length>1?afSharedChapter(turn,ctx):afStoryChapter(turn,survivor,location,events);
+ const n=Number(turn?.turn_number)||1;
+ const twist=afTwistChapters[n];
+ if(ctx?.group?.members?.length>1)return base;
+ return base+'\n\n'+'PUBLIC BROADCAST · '+news.headline+'\n'+news.body+(twist?'\n\n'+twist[0]+'\n'+twist[1]:'');
 }
 function journal(events){const entries=(events||[]).slice().reverse();$('afLiveJournal').innerHTML='<div class="sub">YOUR PRIVATE CHRONICLE</div>'+ (entries.length?entries.map(e=>'<p><b>Turn '+Number(e.turn_number)+'</b> · '+esc(e.body)+'</p>').join(''):'<p>Your own consequences will appear here after the first completed turn.</p>')}
 function render(s){turn=s.turn;const pos=s.position;if(pos)mapPosition(pos);journal(s.events);$('onlineCount').textContent='· '+s.participants+' ACTIVE IN CAMPAIGN';
@@ -1828,17 +1931,20 @@ function render(s){turn=s.turn;const pos=s.position;if(pos)mapPosition(pos);jour
  howard:'Sunset Park, Brooklyn. Trains are still running, and the streets carry their usual mix of conversations and traffic. A regional notice appears on your phone, vague enough to be easy to dismiss.',
  curtis:'Staten Island, New York. The neighborhood is quiet, and the city across the harbor feels far away. A news notification mentions emergency calls in another borough. Nothing around you looks different.'
  };
- const opening=turn.turn_number===1?(introByName[nameKey]||'New York is still functioning. The first strange reports are easy to dismiss.'):'The city has not stopped all at once. Each neighborhood experiences the growing crisis differently, and your next decision will shape what you learn.';
- const narrative=opening+'\n\n'+turn.prompt+'\n\n'+(s.perspective||'');$('chapterBook').textContent=narrative;
- const head=document.createElement('p');head.style.whiteSpace='pre-line';head.textContent=opening+'\n\n'+turn.prompt;$('afLiveChoices').appendChild(head);
- const perspective=document.createElement('p');perspective.textContent=s.perspective||'';$('afLiveChoices').appendChild(perspective);
- if(s.my_mode!=='active'){msg('Your character is '+s.my_mode+'. Decisions are unavailable until Mikel assigns you Active.');const p=document.createElement('p');p.className='af-small';p.textContent='NPCs make automatic server-side decisions; inactive characters do not participate.';$('afLiveChoices').appendChild(p)}else if(s.submitted_by_me){msg('Decision submitted · '+s.submitted+' / '+s.participants+' survivors ready. Your decision stays private.');const p=document.createElement('p');p.className='af-small';p.textContent='Waiting for the remaining active players.';$('afLiveChoices').appendChild(p)}else{msg('LIVE · '+s.submitted+' / '+s.participants+' survivors ready. Select your decision.');choiceUI()}
+ const story=afWorldStory(turn,name,pos?.label,s.events,afSharedContext);
+ $('chapterBook').textContent=story;
+ $('chapterBook').style.whiteSpace='pre-line';
+ const prelude=document.createElement('div');prelude.className='af-live-prelude';prelude.textContent=story;
+ prelude.style.whiteSpace='pre-line';prelude.style.lineHeight='1.85';prelude.style.marginBottom='24px';
+ $('afLiveChoices').appendChild(prelude);
+ const decisionHeading=document.createElement('h3');decisionHeading.textContent='WHAT DO YOU DO?';decisionHeading.style.letterSpacing='2px';$('afLiveChoices').appendChild(decisionHeading);
+  if(s.my_mode!=='active'){msg('Your character is '+s.my_mode+'. Decisions are unavailable until Mikel assigns you Active.');const p=document.createElement('p');p.className='af-small';p.textContent='NPCs make automatic server-side decisions; inactive characters do not participate.';$('afLiveChoices').appendChild(p)}else if(s.submitted_by_me){msg('Decision submitted · '+s.submitted+' / '+s.participants+' survivors ready. Your decision stays private.');const p=document.createElement('p');p.className='af-small';p.textContent='Waiting for the remaining active players.';$('afLiveChoices').appendChild(p)}else{msg('LIVE · '+s.submitted+' / '+s.participants+' survivors ready. Select your decision.');choiceUI()}
 }
 let busy=false;async function refresh(){if(busy||!c())return;busy=true;try{
  const {data:{user}}=await c().auth.getUser();if(!user){document.body.classList.remove('af-live-ready');userId=null;return}
  const {data,error}=await c().from('af_players').select('character_name,survey_complete').eq('user_id',user.id).maybeSingle();if(error||!data?.survey_complete){document.body.classList.remove('af-live-ready');return}
  userId=user.id;name=data.character_name;document.body.classList.add('af-live-ready');
- try{const snapshot=await rpc('af_live_snapshot');render(snapshot)}catch(e){$('afLiveTitle').textContent='MULTIPLAYER CONNECTION ERROR';msg(e.message+' · Check that the V49 SQL migration was installed.')} 
+ try{const snapshot=await rpc('af_live_snapshot');try{afSharedContext=await rpc('af_story_context')}catch(contextError){afSharedContext=null;console.warn('Shared story unavailable:',contextError.message)}render(snapshot)}catch(e){$('afLiveTitle').textContent='MULTIPLAYER CONNECTION ERROR';msg(e.message+' · Check that the V49 SQL migration was installed.')} 
  }catch(e){msg('Connection error: '+e.message)}finally{busy=false}}
  setInterval(refresh,4000);setTimeout(refresh,1400);
 })();
