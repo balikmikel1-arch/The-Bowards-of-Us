@@ -1925,6 +1925,7 @@ function render(s){turn=s.turn;const pos=s.position;if(pos)mapPosition(pos);jour
  howard:'Sunset Park, Brooklyn. Trains are still running, and the streets carry their usual mix of conversations and traffic. A regional notice appears on your phone, vague enough to be easy to dismiss.',
  curtis:'Staten Island, New York. The neighborhood is quiet, and the city across the harbor feels far away. A news notification mentions emergency calls in another borough. Nothing around you looks different.'
  };
+let afSharedContext = null;
  const story=afWorldStory(turn,name,pos?.label,s.events,afSharedContext);
  $('chapterBook').textContent=story;
  $('chapterBook').style.whiteSpace='pre-line';
