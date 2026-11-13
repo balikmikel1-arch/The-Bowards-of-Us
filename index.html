@@ -1105,6 +1105,13 @@ resolveAfterfallSpawns();
   if(!items.some(x=>/backpack/i.test(x[0])))items.push(['Everyday backpack',0.5,1.5]);
   p.items=items;p.weight=Number(items.reduce((sum,x)=>sum+x[1],0).toFixed(2));p.volume=Number(items.reduce((sum,x)=>sum+x[2],0).toFixed(2));p.profileReady=true;
  }
+ // Expose a narrowly scoped restoration hook for the authenticated cloud profile.
+ window.AFrestoreCloudProfile=function(index,answers){
+  if(!Number.isInteger(index)||index<0||index>=people.length||!Array.isArray(answers)||answers.length!==60)return false;
+  profiles[index]=answers.slice();save();
+  if(completed(index)){applyProfile(index);overlay.classList.add('hide');return true;}
+  return false;
+ };
  for(let i=0;i<people.length;i++)if(completed(i))applyProfile(i);
  const priorClaim=claimed;
  if(priorClaim!==null&&!allowed(priorClaim)){claimed=null;localStorage.removeItem('afterfall_claimed_character');}
@@ -1660,6 +1667,9 @@ function localForOwner(row){
  if(Array.isArray(data?.answers)&&data.answers.length===60){
   const profiles={};profiles[index]=data.answers;
   localStorage.setItem(PROFILE_KEY,JSON.stringify(profiles));
+  // The original survey engine already initialized before the cloud response.
+  // Hydrate its in-memory profile too; otherwise it wrongly requests 60 answers again.
+  if(typeof window.AFrestoreCloudProfile==='function')window.AFrestoreCloudProfile(index,data.answers);
  }
  localStorage.setItem('afterfall_claimed_character',String(index));
  claimed=String(index);selected=index;
@@ -1701,9 +1711,12 @@ async function saveSurvey(){
  if(!Array.isArray(a)||a.length!==60)return;
  const serialized=JSON.stringify(a);if(serialized===lastSurvey)return;
  const complete=a.every(x=>x!==null&&x!==undefined&&String(x).trim()!=='');
- const {error}=await client().from('af_players').update({survey:{answers:a},survey_complete:complete}).eq('user_id',user.id);
+ // Preserve additional cloud survey fields such as heightWeight.
+ const existing=(own.survey&&typeof own.survey==='object')?own.survey:{};
+ const updatedSurvey={...existing,answers:a};
+ const {error}=await client().from('af_players').update({survey:updatedSurvey,survey_complete:complete}).eq('user_id',user.id);
  if(error){console.error('AFTERFALL survey cloud save failed:',error);say('Survey cloud save failed: '+error.message);return}
- lastSurvey=serialized;
+ own.survey=updatedSurvey;lastSurvey=serialized;
 }
 // Existing survey still runs unchanged; its local saves are mirrored to the authenticated player's row.
 window.addEventListener('storage',e=>{if(e.key===PROFILE_KEY)saveSurvey()});
