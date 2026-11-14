@@ -1772,6 +1772,57 @@ const panel=document.createElement('section');panel.id='afLiveOriginal';panel.in
 const stats=document.createElement('p');stats.id='afV52Survival';stats.style.cssText='font-size:12px;color:#e1c89c;margin:9px 0 12px;letter-spacing:.03em';panel.insertBefore(stats,document.getElementById('afLiveChoices'));const story=document.querySelector('.story');story.insertBefore(panel,story.firstChild);
 let userId=null, name='', turn=null, chosen=null, pending=false, lastTurn=null, lastLocation='', mapOk=false, privateMap=null;
 let afSharedContext=null;
+let afAIScene=null, afAIKey='', afAIBusy=false, afAIBeats=[], afAIDraft='';
+async function afAICall(payload){
+ const client=c();const {data:{session},error}=await client.auth.getSession();
+ if(error||!session?.access_token)throw new Error('Sign in to use the AI Director');
+ const {data,error:invokeError}=await client.functions.invoke('afterfall-director',{body:payload});
+ if(invokeError)throw new Error(invokeError.message||'AI Director unavailable');
+ if(data?.error)throw new Error(data.error);return data;
+}
+async function afAILoad(snapshot){
+ const key=String(snapshot?.turn?.turn_number||'')+'|'+String(userId||'');
+ if(!snapshot?.turn||!userId||afAIKey===key||afAIBusy)return;
+ afAIKey=key;afAIScene=null;afAIBeats=[];afAIDraft='';afAIBusy=true;
+ try{
+  const response=await afAICall({operation:'scene'});
+  if(afAIKey!==key||Number(response.turn)!==Number(snapshot.turn.turn_number))return;
+  afAIScene=response.scene;
+  const story=$('chapterBook');if(story)story.textContent=afAIScene.title+'\n\n'+afAIScene.narrative;
+  const prelude=document.querySelector('#afLiveChoices .af-live-prelude');if(prelude)prelude.textContent=afAIScene.title+'\n\n'+afAIScene.narrative;
+  const heading=document.querySelector('#afLiveChoices h3');if(heading)heading.textContent='YOUR DECISION · '+afAIScene.question;
+  if(!snapshot.submitted_by_me&&snapshot.my_mode==='active')choiceUI();
+ }catch(e){console.warn('AI Director fallback:',e.message);msg('AI Director unavailable: '+e.message+' · Existing game choices remain available.');}
+ finally{afAIBusy=false}
+}
+function afAIChoiceUI(){
+ const el=$('afLiveChoices');
+ el.querySelectorAll('.af-choice,.af-live-button,.af-choice-error,.af-tense-text,.af-free-text,.af-free-label,.af-ai-choice').forEach(x=>x.remove());
+ if(!afAIScene||!turn||turn.phase!=='collecting')return;
+ const p=document.createElement('p');p.className='af-ai-choice';p.textContent=afAIScene.question;el.appendChild(p);
+ if(afAIScene.mode==='tense'&&afAIBeats.length<(afAIScene.beats||[]).length){
+  const beat=document.createElement('p');beat.className='af-ai-choice';beat.textContent=afAIScene.beats[afAIBeats.length];el.appendChild(beat);
+  const field=document.createElement('textarea');field.className='af-ai-choice';field.rows=3;field.maxLength=240;field.placeholder='What do you do in the next few seconds?';field.style.cssText='display:block;width:100%;box-sizing:border-box;padding:10px;background:#111b20;color:white';el.appendChild(field);
+  const next=document.createElement('button');next.className='af-live-button af-ai-choice';next.textContent='CONTINUE · SECONDS PASS';next.onclick=()=>{if(!field.value.trim())return;afAIBeats.push(field.value.trim());afAIChoiceUI()};el.appendChild(next);return;
+ }
+ let field=null;
+ if(['free_text','dialogue','tense'].includes(afAIScene.mode)){
+  field=document.createElement('textarea');field.className='af-ai-choice';field.rows=3;field.maxLength=600;field.placeholder=afAIScene.mode==='dialogue'?'What do you say?':'Describe what you attempt…';field.value=afAIDraft;field.oninput=()=>{afAIDraft=field.value};field.style.cssText='display:block;width:100%;box-sizing:border-box;margin:12px 0;padding:12px;background:#121b20;color:#fff;border:1px solid #52616a;border-radius:6px';el.appendChild(field);
+ }
+ for(const option of afAIScene.options){
+  const b=document.createElement('button');b.className='af-choice af-ai-choice'+(chosen===option.id?' active':'');b.textContent=option.label;b.onclick=()=>{chosen=option.id;afAIChoiceUI()};el.appendChild(b);
+ }
+ const submit=document.createElement('button');submit.className='af-live-button af-ai-choice';submit.textContent='COMMIT DECISION · END DAY';submit.disabled=pending||!chosen;
+ submit.onclick=async()=>{
+  const option=afAIScene.options.find(o=>o.id===chosen);if(!option)return;
+  if(field&&!afAIDraft.trim()){msg('Write your response first.');return;}
+  pending=true;submit.disabled=true;
+  try{await afAICall({operation:'decision',option_id:option.id,action_kind:option.action_kind,player_text:afAIDraft,beat_history:afAIBeats});msg('Decision saved. Waiting for active survivors.');await refresh()}
+  catch(e){msg('Decision failed: '+e.message)}finally{pending=false}
+ };
+ el.appendChild(submit);
+}
+
 let afFreeDraft='';
 let afTenseState={turn:0,step:0,first:null};
 // Local actions only during the early outbreak. Long-distance travel is not a Day 1 choice.
@@ -1915,6 +1966,7 @@ function afTenseScene(){
 }
 
 function choiceUI(){
+ if(afAIScene){afAIChoiceUI();return;}
  const el=$('afLiveChoices');
  const oldDraft=el.querySelector('.af-free-text');if(oldDraft)afFreeDraft=oldDraft.value;
  el.querySelectorAll('.af-choice,.af-live-button,.af-choice-error,.af-tense-text,.af-free-text,.af-free-label').forEach(x=>x.remove());
@@ -2006,26 +2058,32 @@ function afWorldStory(turn,survivor,location,events,ctx){
  return base+'\n\n'+'PUBLIC BROADCAST · '+news.headline+'\n'+news.body+(twist?'\n\n'+twist[0]+'\n'+twist[1]:'');
 }
 function journal(events){const entries=(events||[]).slice().reverse();$('afLiveJournal').innerHTML='<div class="sub">YOUR PRIVATE CHRONICLE</div>'+ (entries.length?entries.map(e=>'<p><b>Turn '+Number(e.turn_number)+'</b> · '+esc(e.body)+'</p>').join(''):'<p>Your own consequences will appear here after the first completed turn.</p>')}
-function render(s){turn=s.turn;const pos=s.position;if(pos)mapPosition(pos);journal(s.events);$('onlineCount').textContent='· '+s.participants+' ACTIVE IN CAMPAIGN';
+function render(s){turn=s.turn;const pos=s.position;if(pos)mapPosition(pos);journal(s.events);$('onlineCount').textContent='· '+s.participants+' ROSTER PARTICIPANTS (INCLUDES NPCS)';
  $('afLiveChoices').replaceChildren();$('chapterBook').textContent='Live campaign chronicle is shown below. Your private actions are not shared with other survivors.';const st=s.survival||{};const stats=$('afV52Survival');if(stats){stats.textContent=st.health===undefined?'SURVIVAL · Waiting for Day 1':'SURVIVAL · Health '+st.health+' · Food '+st.food+' · Water '+st.water+' · Medicine '+st.medicine+' · Fatigue '+st.fatigue+' · Stress '+st.stress;}
  if(!turn){$('afLiveTitle').textContent='WAITING TO START · LIVE LOBBY';msg(s.participants+' survivors have completed their profiles. All six must have completed surveys or be assigned automatic NPCs before starting.');if(name.toLowerCase()==='mikel'){
  const b=document.createElement('button');b.className='af-live-button';b.textContent='START SHARED CAMPAIGN';b.onclick=async()=>{b.disabled=true;try{await rpc('af_live_start');await refresh()}catch(e){msg('Cannot start: '+e.message)}finally{b.disabled=false}};$('afLiveChoices').appendChild(b)}return}
- if(lastTurn!==turn.turn_number){lastTurn=turn.turn_number;chosen=null;afFreeDraft=''}
+ if(lastTurn!==turn.turn_number){lastTurn=turn.turn_number;chosen=null;afFreeDraft='';afAIScene=null;afAIBeats=[];afAIDraft=''}
  $('afLiveTitle').textContent='TURN '+turn.turn_number+' · '+turn.title;$('sceneTitle').textContent=turn.title;
- const story=afWorldStory(turn,name,pos?.label,s.events,afSharedContext);
+ const story=afAIScene ? afAIScene.title+'\n\n'+afAIScene.narrative : afWorldStory(turn,name,pos?.label,s.events,afSharedContext);
  $('chapterBook').textContent=story;
  $('chapterBook').style.whiteSpace='pre-line';
  const prelude=document.createElement('div');prelude.className='af-live-prelude';prelude.textContent=story;
  prelude.style.whiteSpace='pre-line';prelude.style.lineHeight='1.85';prelude.style.marginBottom='24px';
  $('afLiveChoices').appendChild(prelude);
- const decisionHeading=document.createElement('h3');decisionHeading.textContent='YOUR DECISION · '+afEpisode(turn)[0];decisionHeading.style.letterSpacing='2px';$('afLiveChoices').appendChild(decisionHeading);
+ const decisionHeading=document.createElement('h3');decisionHeading.textContent='YOUR DECISION · '+(afAIScene?.question||afEpisode(turn)[0]);decisionHeading.style.letterSpacing='2px';$('afLiveChoices').appendChild(decisionHeading);
   if(s.my_mode!=='active'){msg('Your character is '+s.my_mode+'. Decisions are unavailable until Mikel assigns you Active.');const p=document.createElement('p');p.className='af-small';p.textContent='NPCs make automatic server-side decisions; inactive characters do not participate.';$('afLiveChoices').appendChild(p)}else if(s.submitted_by_me){msg('Decision submitted · '+s.submitted+' / '+s.participants+' survivors ready. Your decision stays private.');const p=document.createElement('p');p.className='af-small';p.textContent='Waiting for the remaining active players.';$('afLiveChoices').appendChild(p)}else{msg('LIVE · '+s.submitted+' / '+s.participants+' survivors ready. Select your decision.');choiceUI()}
+ afAILoad(s);
 }
 let busy=false;async function refresh(){if(busy||!c())return;busy=true;try{
  const {data:{user}}=await c().auth.getUser();if(!user){document.body.classList.remove('af-live-ready');userId=null;return}
  const {data,error}=await c().from('af_players').select('character_name,survey_complete').eq('user_id',user.id).maybeSingle();if(error||!data?.survey_complete){document.body.classList.remove('af-live-ready');return}
  userId=user.id;name=data.character_name;document.body.classList.add('af-live-ready');
- try{const snapshot=await rpc('af_live_snapshot');try{afSharedContext=await rpc('af_story_context')}catch(contextError){afSharedContext=null;console.warn('Shared story unavailable:',contextError.message)}render(snapshot)}catch(e){$('afLiveTitle').textContent='MULTIPLAYER CONNECTION ERROR';msg(e.message+' · Copy this exact error for troubleshooting.')} 
+ try{let snapshot=await rpc('af_live_snapshot');
+ if(name?.trim().toLowerCase()==='mikel'&&snapshot?.turn?.phase==='collecting'&&snapshot?.submitted_by_me){
+  try {const result=await rpc('af_admin_reconcile_turn');if(result?.advanced)snapshot=await rpc('af_live_snapshot')}
+  catch(reconcileError){console.warn('Turn reconciliation unavailable:',reconcileError.message)}
+ }
+ try{afSharedContext=await rpc('af_story_context')}catch(contextError){afSharedContext=null;console.warn('Shared story unavailable:',contextError.message)}render(snapshot)}catch(e){$('afLiveTitle').textContent='MULTIPLAYER CONNECTION ERROR';msg(e.message+' · Copy this exact error for troubleshooting.')} 
  }catch(e){msg('Connection error: '+e.message)}finally{busy=false}}
  setInterval(refresh,4000);setTimeout(refresh,1400);
 })();
@@ -2062,7 +2120,12 @@ btn.addEventListener('click',async e=>{e.stopImmediatePropagation();modal.classL
 apply.addEventListener('click',async e=>{e.stopImmediatePropagation();if(!isAdmin||!currentUser){message('Only Mikel can save changes.');return}apply.disabled=true;
  try{const payload=[...rows.querySelectorAll('select[data-character]')].map(el=>({character_name:el.dataset.character,mode:el.dataset.character==='Mikel'?'active':el.value}));
  const {error}=await client().from('af_session_roster').upsert(payload,{onConflict:'character_name'});if(error)throw error;
- dirty=false;message('Saved to Supabase. All players will see the new roster.');await load(true);
+ dirty=false;message('Saved to Supabase. Checking whether the current day can advance…');
+ try {const {data:result,error:reconcileError}=await client().rpc('af_admin_reconcile_turn');
+  if(reconcileError)throw reconcileError;
+  message(result?.advanced?'Saved. Pending day resolved; refresh to see the next day.':`Saved. ${result?.ready??0} / ${result?.needed??0} active survivors have submitted.`);
+ } catch(reconcileError){message('Roster saved, but day reconciliation requires V66 SQL: '+reconcileError.message)}
+ await load(true);
  }catch(err){message('Save failed: '+err.message)}finally{apply.disabled=false}},true);
 setInterval(()=>{if(!modal.classList.contains('hide'))load()},5000);
 setTimeout(load,1700);
@@ -2074,7 +2137,8 @@ setTimeout(load,1700);
 #afRestartStatus{font-size:11px;line-height:1.5;color:#e9c5a5}
 </style>
 <script id="af-admin-restart">
-(()=>{'use strict';
+(()=>{
+'use strict';
 const modal=document.getElementById('modalback');
 const apply=document.getElementById('applySession');
 if(!modal||!apply)return;
@@ -2084,39 +2148,53 @@ button.type='button';
 button.textContent='↻ RESTART CAMPAIGN · ADMIN ONLY';
 const status=document.createElement('p');
 status.id='afRestartStatus';
+status.setAttribute('role','status');
 apply.insertAdjacentElement('afterend',button);
 button.insertAdjacentElement('afterend',status);
 let admin=false;
+let checking=false;
+function show(t){status.textContent=t}
 async function checkAdmin(){
- const c=window.afterfallSupabase;
- if(!c)return;
+ if(checking)return;
+ checking=true;
  try{
-  const {data:{user},error:authErr}=await c.auth.getUser();
-  if(authErr)throw authErr;
-  if(!user){admin=false;button.style.display='none';return}
-  const {data,error}=await c.from('af_players').select('character_name').eq('user_id',user.id).maybeSingle();
+  const c=window.afterfallSupabase;
+  if(!c)throw Error('Supabase connection not ready. Refresh and try again.');
+  const {data,error}=await c.auth.getUser();
   if(error)throw error;
-  admin=data?.character_name?.trim().toLowerCase()==='mikel';
+  const user=data?.user;
+  if(!user){admin=false;button.style.display='none';show('Sign in as Mikel to restart.');return}
+  const {data:profile,error:profileError}=await c.from('af_players').select('character_name').eq('user_id',user.id).maybeSingle();
+  if(profileError)throw profileError;
+  admin=String(profile?.character_name||'').trim().toLowerCase()==='mikel';
   button.style.display=admin?'block':'none';
- }catch(e){admin=false;button.style.display='none';console.error('Admin check failed',e)}
+  show(admin?'Restart is available. This resets campaign progress, not player profiles or surveys.':'Only the Mikel character can restart the shared campaign.');
+ }catch(e){
+  admin=false;
+  button.style.display='none';
+  show('Restart unavailable: '+(e?.message||String(e)));
+ }finally{checking=false}
 }
-document.getElementById('sessionBtn')?.addEventListener('click',()=>setTimeout(checkAdmin,100),true);
-// Check on initial load too; the lobby can open through other code paths.
-window.addEventListener('load',()=>{checkAdmin();setTimeout(checkAdmin,1200)});
-modal.addEventListener('click',()=>{if(!modal.classList.contains('hide'))checkAdmin()},{once:true});
+document.getElementById('sessionBtn')?.addEventListener('click',()=>setTimeout(checkAdmin,50),true);
+window.addEventListener('load',()=>setTimeout(checkAdmin,700));
+modal.addEventListener('click',()=>{if(!modal.classList.contains('hide'))setTimeout(checkAdmin,80)});
 button.addEventListener('click',async()=>{
  if(!admin)return;
- if(!confirm('Restart the shared campaign for everyone? This permanently erases story turns, decisions, private journals, NPC memories, survival resources and map positions. Character accounts and survey answers stay saved.'))return;
- const confirmation=prompt('To restart for ALL players, type RESTART exactly:');
- if(confirmation!=='RESTART'){status.textContent='Restart canceled.';return}
- button.disabled=true;status.textContent='Resetting shared world…';
+ if(!confirm('Restart AFTERFALL for everyone? This permanently erases current campaign progress. Player accounts and surveys should remain, subject to the installed database reset function.'))return;
+ if(prompt('Type RESTART to confirm:')!=='RESTART'){show('Restart canceled.');return}
+ button.disabled=true;show('Requesting restart from Supabase…');
  try{
-  const {error}=await window.afterfallSupabase.rpc('af_admin_restart_campaign');
+  const c=window.afterfallSupabase;
+  if(!c)throw Error('Supabase connection unavailable');
+  const {data,error}=await c.rpc('af_admin_restart_campaign');
   if(error)throw error;
-  status.textContent='Campaign reset. All six survivors can return to the waiting lobby. Surveys and roster assignments are preserved.';
-  setTimeout(()=>location.reload(),900);
- }catch(e){status.textContent='Restart failed: '+(e.message||e)+' — Make sure the restart SQL has been installed.'}
- finally{button.disabled=false}
+  show('Restart request completed. Reloading the game…');
+  setTimeout(()=>location.reload(),1200);
+ }catch(e){
+  const message=e?.message||String(e);
+  show('Restart failed: '+message+(message.includes('Could not find the function')||message.includes('404')?' — The af_admin_restart_campaign database function is missing. The website cannot safely recreate it.':''));
+  console.error('AFTERFALL restart failure',e);
+ }finally{button.disabled=false}
 });
 })();
 </script>
