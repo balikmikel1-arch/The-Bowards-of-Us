@@ -468,12 +468,12 @@ html,body{min-height:100%;}
 #afLiveChoices .af-live-prelude{font-size:15px!important;}}
 </style>
 <style id="af-v74-readable">
-body.af-live-ready #chapterBook, body.af-live-ready #afLiveChoices .af-live-prelude,
-body.af-live-ready #afLiveChoices .af-tense-text {font-size:18px!important;line-height:1.8!important;}
-body.af-live-ready #chapterBook p,body.af-live-ready #chapterBook .chapter-paragraph,
-body.af-live-ready #afLiveChoices .af-free-label {font-size:17px!important;line-height:1.8!important;}
-body.af-live-ready #afLiveChoices .af-choice,body.af-live-ready #afLiveChoices .af-ai-choice,
-body.af-live-ready #afLiveChoices textarea {font-size:16px!important;line-height:1.6!important;}
+body #chapterBook, body #afLiveChoices .af-live-prelude,
+body #afLiveChoices .af-tense-text {font-size:18px!important;line-height:1.8!important;}
+body #chapterBook p,body #chapterBook .chapter-paragraph,
+body #afLiveChoices .af-free-label {font-size:17px!important;line-height:1.8!important;}
+body #afLiveChoices .af-choice,body #afLiveChoices .af-ai-choice,
+body #afLiveChoices textarea {font-size:16px!important;line-height:1.6!important;}
 </style></head><body><header><div><div class="brand">AFTER<span>FALL</span> <span style="font-size:12px;color:#a5b1bc">/ THE WORLD BEYOND NYC</span></div><div class="sub">MULTIPLAYER SURVIVAL · LIVE CAMPAIGN</div></div><div class="header-right"><span class="pill" id="claimedBadge">● UNCLAIMED</span><div style="text-align:right"><div class="clock" id="clock">21:43</div><div class="tiny" id="date">NOV 12, 2026 · 46°F</div></div><button class="btn small" id="sessionBtn">⚙ LOBBY</button></div></header><main class="grid"><aside class="sidebar"><div class="section-title">SURVIVORS <span id="onlineCount">· 6 ACTIVE</span></div><div id="players"></div><div class="divider"></div><div class="section-title">YOUR CASH</div><div class="cash-widget"><div class="cash-label">PERSONAL WALLET</div><div class="cash-amount" id="sidebarCash">$200.00</div><div class="cash-sub">Physical US dollars · private balance</div><button class="btn small" id="walletShortcut" style="margin-top:10px;width:100%">VIEW WALLET & TRANSACTIONS</button></div><div class="divider"></div><div class="section-title">YOUR CURRENT POSITION</div><div class="info"><h4 id="currentPlace">Midtown Manhattan</h4><p id="locDetails">New York City, New York</p><p>☾ Night · Autumn · Cold</p></div><div class="sidebar-hidden-systems" aria-hidden="true" style="display:none"><div class="section-title">MAP CAMERA</div><div class="info"><h4>🔒 LOCATION LOCKED</h4><p>Shows only the area around your claimed character. The map automatically moves to a new neighborhood when the game engine updates your character's location.</p><p class="note">You cannot switch cities, pan, drag, or scroll the map. Nearby friends appear only when their position is known.</p></div><div class="divider"></div><div class="section-title">CHARACTER & STORY SYSTEMS</div>
 
 <button class="btn full" id="eventJournalBtn" style="margin-bottom:8px">⚡ WORLD EVENTS <span id="eventCount">0</span></button>
@@ -1769,7 +1769,7 @@ const ready=setInterval(()=>{
 })();
 </script>
 <style id="af-v50-style">
-body.af-live-ready #sceneGate,body.af-live-ready #choicePanel,body.af-live-ready .story-tools,body.af-live-ready #log,body.af-live-ready #freeActionArea,body.af-live-ready #pastChapters,body.af-live-ready #chapterBook,body.af-live-ready #sessionBtn,body.af-live-ready #mapFallback .map-fallback-dot{display:none!important}
+body.af-live-ready #sceneGate,body.af-live-ready #choicePanel,body.af-live-ready .story-tools,body.af-live-ready #log,body.af-live-ready #freeActionArea,body.af-live-ready #pastChapters,body #chapterBook,body.af-live-ready #sessionBtn,body.af-live-ready #mapFallback .map-fallback-dot{display:none!important}
 #afLiveOriginal{display:none;padding:17px 18px;border:1px solid #5b665f;border-radius:10px;background:#111e26;color:#e5e9e6;margin:12px 0 20px}
 body.af-live-ready #afLiveOriginal{display:block}
 #afLiveOriginal h3{font:700 23px 'Barlow Condensed',sans-serif;letter-spacing:1px;color:#e7c08a;margin:5px 0 12px}
@@ -1843,7 +1843,7 @@ function afAIChoiceUI(){
   if(!option)return;
   pending=true;submit.disabled=true;
   const penn=day===1&&!isWritten&&option.action_kind==='hold';
-  const playerText=penn?'I propose that everyone meet at Penn Station in Manhattan. This is a plan, not an instant arrival.':afAIDraft;
+  const playerText=isWritten?afAIDraft.trim():(penn?'I propose that everyone meet at Penn Station in Manhattan. This is a plan, not an instant arrival.':option.label);
   try{await afAICall({operation:'decision',option_id:option.id,action_kind:option.action_kind,player_text:playerText,beat_history:[]});msg('Decision saved. Waiting for active survivors.');await refresh()}
   catch(e){msg('Decision failed: '+e.message)}finally{pending=false}
  };
