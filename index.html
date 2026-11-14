@@ -1768,10 +1768,11 @@ body.af-live-ready .chronicle-explainer{display:none}
 <script id="af-v50-live-original">
 (()=>{'use strict';
 const $=id=>document.getElementById(id), c=()=>window.afterfallSupabase;
-const panel=document.createElement('section');panel.id='afLiveOriginal';panel.innerHTML='<div class="sub">AFTERFALL · SHARED WORLD · MULTIPLAYER V52</div><h3 id="afLiveTitle">CONNECTING TO THE WORLD</h3><p id="afLiveMessage">Checking your survivor…</p><div id="afLiveChoices"></div><div class="af-journal" id="afLiveJournal"></div>';
+const panel=document.createElement('section');panel.id='afLiveOriginal';panel.innerHTML='<div class="sub">AFTERFALL · SHARED WORLD · MULTIPLAYER V65</div><h3 id="afLiveTitle">CONNECTING TO THE WORLD</h3><p id="afLiveMessage">Checking your survivor…</p><div id="afLiveChoices"></div><div class="af-journal" id="afLiveJournal"></div>';
 const stats=document.createElement('p');stats.id='afV52Survival';stats.style.cssText='font-size:12px;color:#e1c89c;margin:9px 0 12px;letter-spacing:.03em';panel.insertBefore(stats,document.getElementById('afLiveChoices'));const story=document.querySelector('.story');story.insertBefore(panel,story.firstChild);
 let userId=null, name='', turn=null, chosen=null, pending=false, lastTurn=null, lastLocation='', mapOk=false, privateMap=null;
 let afSharedContext=null;
+let afFreeDraft='';
 let afTenseState={turn:0,step:0,first:null};
 // Local actions only during the early outbreak. Long-distance travel is not a Day 1 choice.
 const localChoices={
@@ -1847,17 +1848,24 @@ const afCharacterDecisions={
  ['Ask whether the local bus detour is confirmed by transit staff','Pick up a first-aid kit or replacement batteries','Remain close to home until the route is clarified']
  ]
 };
+// Every survivor receives distinct prompts. The format changes by day.
+const afDecisionPrompts={
+ mikel:['Who in Merrick do you trust with your last working charger, and why?','A neighbor offers a ride but refuses to say where. What do you say?','An emergency alert lists your street incorrectly. What is your next move?'],
+ avery:['A familiar voice calls from an unknown number. What do you ask first?','A shop owner will only help one person in line. What do you do?','Someone asks you to keep a disturbing discovery secret. What is your answer?'],
+ daniel:['A Canarsie resident recognizes someone in a blurry emergency video. What do you ask?','A locked door separates you from a person asking for help. What is your plan?','A friend asks you to cross a closed street after dark. How do you respond?'],
+ bryce:['You notice someone following you through two Brooklyn blocks. What do you do?','A stranger wants to trade medicine for your phone. What is your response?','Someone blames an innocent neighbor for a disappearance. What do you say?'],
+ howard:['A subway worker says the platform is unsafe but refuses details. What do you ask?','A panicked passenger drops a bag near the tracks. What is your move?','A radio broadcast contradicts the evacuation signs. How do you decide?'],
+ curtis:['The ferry terminal shuts its gates while people are still inside. What do you do?','A Staten Island neighbor wants to share a shelter with strangers. Your response?','A person on the waterfront signals for help across a barrier. What is your plan?']
+};
+function afPacingStage(n){return n<=2?'unsettling reports':n<=4?'first public panic':n<=7?'local breakdown':n<=11?'organized survival':n<=16?'dangerous infected sightings':'escalating outbreak'}
 function choicesForTurn(){
- const n=Math.max(1,Number(turn?.turn_number)||1);
- const who=String(name||'').trim().toLowerCase();
+ const n=Math.max(1,Number(turn?.turn_number)||1),who=String(name||'').trim().toLowerCase();
  const sets=afCharacterDecisions[who]||afCharacterDecisions.mikel;
- const dayIndex=(n-1)%sets.length;
- const cycle=Math.floor((n-1)/sets.length);
- const base=sets[dayIndex];
- // Later days get a new context rather than pretending the earlier incident is happening again.
- const later=cycle?`After ${cycle*sets.length} days of changing conditions, `:'';
- return [['hold',later+base[0]],['scavenge',later+base[1]],['rest',later+base[2]]];
+ const base=sets[(n-1)%sets.length];
+ const stage=afPacingStage(n);
+ return [['hold',base[0]+' · '+stage],['scavenge',base[1]],['rest',base[2]]];
 }
+function afQuestionForTurn(){const n=Math.max(1,Number(turn?.turn_number)||1),who=String(name||'').toLowerCase();const q=afDecisionPrompts[who]||afDecisionPrompts.mikel;return q[Math.floor(n/2)%q.length]}
 
 const esc=x=>String(x??'').replace(/[&<>"']/g,z=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[z]));
 const msg=x=>{$('afLiveMessage').textContent=x};
@@ -1882,55 +1890,64 @@ function mapPosition(position){
 
 // Tense decisions are short beats inside one shared turn; only the final action is submitted.
 function afTenseScene(){
- const n=Math.max(1,Number(turn?.turn_number)||1);
- if(n<6||n%6!==0)return null;
- const who=String(name||'').toLowerCase();
- const place=({mikel:'a darkened neighborhood street in Merrick',avery:'a crowded shop entrance in Merrick',daniel:'a blocked crossing in Canarsie',bryce:'a narrow Brooklyn side street',howard:'a stalled subway entrance in Sunset Park',curtis:'a ferry terminal exit on Staten Island'})[who]||'the street';
- return {place,opening:`You are near ${place} when a sudden crash makes everyone stop. A frightened stranger pushes through the crowd. Something heavy strikes a metal shutter behind you. Nobody can tell yet whether this is an accident or a threat.`,beats:[
- ['Step away from the crowd and look for an exit','Ask the stranger what happened without approaching','Move behind solid cover and stay quiet'],
- ['Leave the area using the clearest route','Look for a safe way to help without closing the distance','Stay sheltered until the immediate danger passes']
+ const n=Math.max(1,Number(turn?.turn_number)||1),who=String(name||'').toLowerCase();
+ // Pressure builds quickly; later days bring more frequent threats.
+ if(n<3 || (n<7?n%3!==0:n%2!==0))return null;
+ const places={mikel:'a Merrick side street',avery:'a crowded Long Island storefront',daniel:'a Canarsie apartment corridor',bryce:'a Brooklyn service alley',howard:'a dim Sunset Park stairwell',curtis:'a Staten Island ferry access road'};
+ const place=places[who]||'a narrow street';
+ const infected=n>=8;
+ const openings=infected?[
+ `At ${place}, a figure jerks against a locked gate. Its breathing comes in harsh bursts. When a bottle breaks nearby, its head snaps toward the sound. A second shape moves behind it.`,
+ `At ${place}, a person with gray mottling across their neck stumbles into view. They stop, listening. A wet clicking noise comes from the dark behind them.`,
+ `At ${place}, a survivor bangs on a door. Something strikes the other side hard enough to bend the latch. A second impact comes from a different direction.`
+ ]:[
+ `At ${place}, an argument turns into a stampede. Someone falls. A security shutter begins closing as the crowd pushes toward it.`,
+ `At ${place}, the lights go out and an emergency alarm starts. A person screams from the next room. You cannot see what caused it.`,
+ `At ${place}, a vehicle hits a barrier. Smoke spreads and people rush into the road without looking.`
+ ];
+ return {place,infected,opening:openings[(n+Object.keys(places).indexOf(who)+6)%openings.length],beats:infected?[
+ ['Back away silently and search for another exit','Draw its attention away from the trapped survivor','Barricade the nearest door before it notices you'],
+ ['Escape while the path is clear','Try to guide the survivor out without getting close','Stay hidden and listen for more movement']
+ ]:[
+ ['Move to a safe exit','Call out to find who needs help','Get behind cover and assess the danger'],
+ ['Leave the area','Help from a safe distance','Wait until the crowd clears']
  ]};
 }
+
 function choiceUI(){
  const el=$('afLiveChoices');
- el.querySelectorAll('.af-choice,.af-live-button,.af-choice-error,.af-tense-text').forEach(x=>x.remove());
+ const oldDraft=el.querySelector('.af-free-text');if(oldDraft)afFreeDraft=oldDraft.value;
+ el.querySelectorAll('.af-choice,.af-live-button,.af-choice-error,.af-tense-text,.af-free-text,.af-free-label').forEach(x=>x.remove());
  if(!turn||turn.phase!=='collecting')return;
  const n=Number(turn.turn_number)||1;
  if(afTenseState.turn!==n)afTenseState={turn:n,step:0,first:null};
  const tense=afTenseScene();
- let actions;
+ const freeMode=!tense && n%3===2;
+ const dialogueMode=!tense && n%3===0;
+ let actions=[];
  if(tense){
-  const p=document.createElement('p');p.className='af-tense-text';
-  p.style.whiteSpace='pre-line';p.style.lineHeight='1.8';
-  p.textContent=afTenseState.step===0?
-   `URGENT SCENE · MINUTES, NOT A FULL DAY\n\n${tense.opening}\n\nYou have only seconds to respond.`:
-   `A FEW MINUTES LATER\n\n${afTenseState.first===0?'You pull back as people hurry past. A loose sign falls into the space you just left.':afTenseState.first===1?'The stranger tries to speak, but the noise drowns out half the words. You cannot confirm what caused the commotion.':'From behind cover, you hear footsteps running away and someone calling for help.'}\n\nThe immediate danger has not completely passed. Choose how to finish this encounter.`;
+  const p=document.createElement('p');p.className='af-tense-text';p.style.whiteSpace='pre-line';p.style.lineHeight='1.8';
+  p.textContent=afTenseState.step===0?`IMMEDIATE DANGER · SECONDS\n\n${tense.opening}\n\nYour next action matters.`:`MOMENTS LATER\n\n${afTenseState.first===0?'You shift away from the immediate threat, but the route narrows.':afTenseState.first===1?'Your movement draws attention. Someone shouts a warning.':'The barrier holds for now, but the sounds are getting closer.'}\n\nYou must decide again before the situation settles.`;
   el.appendChild(p);
   actions=tense.beats[afTenseState.step].map((v,i)=>[['hold','scavenge','rest'][i],v]);
+ }else if(freeMode){
+  const p=document.createElement('p');p.className='af-free-label';p.textContent=afQuestionForTurn()+' (Write your own response.)';el.appendChild(p);
+  const input=document.createElement('textarea');input.className='af-free-text';input.rows=3;input.maxLength=350;input.placeholder='Describe what you say or do…';input.value=afFreeDraft;input.addEventListener('input',()=>{afFreeDraft=input.value});input.style.cssText='display:block;width:100%;box-sizing:border-box;margin:12px 0;padding:12px;background:#121b20;color:#fff;border:1px solid #52616a;border-radius:6px';el.appendChild(input);
+  const p2=document.createElement('p');p2.className='af-free-label';p2.textContent='Your written response is not yet saved by the server. Choose the closest action the multiplayer engine can process:';el.appendChild(p2);
+  actions=[['hold','Investigate / negotiate'],['scavenge','Move / gather supplies'],['rest','Withdraw / recover']];
+ }else if(dialogueMode){
+  const p=document.createElement('p');p.className='af-free-label';p.textContent=afQuestionForTurn();el.appendChild(p);
+  actions=[['hold','Ask a direct question and risk drawing attention'],['scavenge','Offer a trade or practical help'],['rest','Refuse to engage and protect your position']];
  }else actions=choicesForTurn();
- for(const [key,label] of actions){
-  const b=document.createElement('button');b.className='af-choice'+(chosen===key?' active':'');b.textContent=label;
-  b.onclick=()=>{chosen=key;choiceUI()};el.appendChild(b);
- }
- const submit=document.createElement('button');submit.className='af-live-button';
- submit.textContent=tense&&afTenseState.step===0?'CONTINUE · A FEW SECONDS PASS':'LOCK IN PRIVATE DECISION';
- submit.disabled=pending||!chosen;
+ for(const [key,label] of actions){const b=document.createElement('button');b.className='af-choice'+(chosen===key?' active':'');b.textContent=label;b.onclick=()=>{chosen=key;choiceUI()};el.appendChild(b)}
+ const submit=document.createElement('button');submit.className='af-live-button';submit.textContent=tense&&afTenseState.step===0?'CONTINUE · SECONDS PASS':'LOCK IN DECISION · END DAY';submit.disabled=pending||!chosen;
  submit.onclick=async()=>{
   if(!chosen)return;
-  if(tense&&afTenseState.step===0){
-   afTenseState.first=['hold','scavenge','rest'].indexOf(chosen);
-   afTenseState.step=1;chosen=null;choiceUI();return;
-  }
+  if(freeMode){const v=el.querySelector('.af-free-text')?.value.trim();if(!v){msg('Write your response before locking in.');return}if(v.length>350)return;}
+  if(tense&&afTenseState.step===0){afTenseState.first=['hold','scavenge','rest'].indexOf(chosen);afTenseState.step=1;chosen=null;choiceUI();return}
   pending=true;submit.disabled=true;
-  try{
-   // Existing RPC accepts only the broad action kind. Fine-grained outcomes require server changes.
-   await rpc('af_live_submit',{p_action:{kind:chosen}});
-   msg('Your decision is locked. Waiting for the other survivors.');await refresh();
-  }catch(e){
-   msg('Action failed: '+e.message);
-   const error=document.createElement('p');error.className='af-small af-choice-error';error.style.color='#ffb5a5';
-   error.textContent='Could not lock decision: '+e.message;el.appendChild(error);
-  }finally{pending=false}
+  try{await rpc('af_live_submit',{p_action:{kind:chosen}});msg('Decision locked. Waiting for other survivors to finish the day.');await refresh()}
+  catch(e){msg('Action failed: '+e.message);const p=document.createElement('p');p.className='af-choice-error';p.textContent=e.message;el.appendChild(p)}finally{pending=false}
  };
  el.appendChild(submit);
 }
@@ -1960,8 +1977,8 @@ function afStoryChapter(turn,survivor,location,events){
  const place=location||'New York';
  const who=String(survivor||'Survivor');
  const previous=(events||[]).filter(e=>Number(e.turn_number)<n).slice(-1).map(e=>String(e.body||'')).filter(Boolean);
- const escalation=n>16?`The old incident has become part of a larger investigation. This is day ${n}, and the public response is no longer what it was when the first reports appeared. A new witness challenges an earlier account; the people around you must decide what evidence they trust.`:'';
- const opener=n===1?`Morning arrives in ${place}. The first reports begin to circulate.`:`In ${place}, the consequences of the previous day are still unfolding. Today's events are different.`;
+ const escalation=n>=8?`DAY ${n} · The outbreak has crossed a threshold. Streets that were merely tense now carry the threat of infected people, dwindling supplies, and routes that may be impossible to retrace. Not every survivor will make it through an encounter.`:n>=4?`DAY ${n} · Emergency services are overwhelmed. The first violent incidents are spreading faster than official explanations.`:n>=2?`DAY ${n} · Conflicting warnings are giving way to real disruptions and increasingly dangerous decisions.`:'';
+ const opener=n===1?`Morning arrives in ${place}. An ordinary routine breaks when the first alerts arrive.`:`You wake in ${place}. What you did yesterday has consequences, and the situation is deteriorating.`;
  return [`DAY ${n} · ${place.toUpperCase()}`,`${who.toUpperCase()} · ${n>16?'FOLLOW-UP: ':''}${episode[0]}`,opener,...(escalation?[escalation]:[]),episode[1],episode[2],episode[3],...(previous.length?['WHAT CARRIES FORWARD\n'+previous[0]]:[])].join('\n\n');
 }
 
@@ -1993,7 +2010,7 @@ function render(s){turn=s.turn;const pos=s.position;if(pos)mapPosition(pos);jour
  $('afLiveChoices').replaceChildren();$('chapterBook').textContent='Live campaign chronicle is shown below. Your private actions are not shared with other survivors.';const st=s.survival||{};const stats=$('afV52Survival');if(stats){stats.textContent=st.health===undefined?'SURVIVAL · Waiting for Day 1':'SURVIVAL · Health '+st.health+' · Food '+st.food+' · Water '+st.water+' · Medicine '+st.medicine+' · Fatigue '+st.fatigue+' · Stress '+st.stress;}
  if(!turn){$('afLiveTitle').textContent='WAITING TO START · LIVE LOBBY';msg(s.participants+' survivors have completed their profiles. All six must have completed surveys or be assigned automatic NPCs before starting.');if(name.toLowerCase()==='mikel'){
  const b=document.createElement('button');b.className='af-live-button';b.textContent='START SHARED CAMPAIGN';b.onclick=async()=>{b.disabled=true;try{await rpc('af_live_start');await refresh()}catch(e){msg('Cannot start: '+e.message)}finally{b.disabled=false}};$('afLiveChoices').appendChild(b)}return}
- if(lastTurn!==turn.turn_number){lastTurn=turn.turn_number;chosen=null}
+ if(lastTurn!==turn.turn_number){lastTurn=turn.turn_number;chosen=null;afFreeDraft=''}
  $('afLiveTitle').textContent='TURN '+turn.turn_number+' · '+turn.title;$('sceneTitle').textContent=turn.title;
  const story=afWorldStory(turn,name,pos?.label,s.events,afSharedContext);
  $('chapterBook').textContent=story;
