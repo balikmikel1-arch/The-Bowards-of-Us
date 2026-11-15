@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AFTERFALL · V90 Survival Edition</title><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet"><link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Bowards of Us</title><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet"><link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"><style>
 :root{--bg:#0a1016;--panel:#121c25;--panel2:#192632;--line:#2b3945;--text:#e8edf1;--muted:#91a1af;--gold:#d8b87d;--green:#85caa4;--red:#dd857c}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px}button,input,textarea,select{font:inherit}button{cursor:pointer}header{height:65px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:0 23px;background:#0c141c}.brand{font:800 29px 'Barlow Condensed';letter-spacing:2px}.brand span{color:var(--gold)}.sub{font-size:10px;color:var(--muted);letter-spacing:2px}.header-right{display:flex;align-items:center;gap:18px}.pill{background:#1d352c;border:1px solid #3d6b55;color:#9ce2b6;padding:7px 10px;border-radius:20px;font-size:10px;font-weight:700}.clock{font:700 24px 'Barlow Condensed';letter-spacing:1px}.grid{display:grid;grid-template-columns:245px minmax(420px,1fr) 320px;height:calc(100vh - 65px);min-height:700px}.sidebar{background:var(--panel);border-right:1px solid var(--line);padding:18px;overflow:auto}.right{background:var(--panel);border-left:1px solid var(--line);padding:17px;overflow:auto}.section-title{color:var(--muted);font-size:10px;letter-spacing:1.5px;font-weight:800;margin:4px 0 13px}.player{display:flex;gap:10px;align-items:center;padding:11px 9px;border:1px solid transparent;border-radius:9px;cursor:pointer;margin-bottom:5px}.player:hover,.player.active{background:#243441;border-color:#3c5262}.avatar{width:32px;height:32px;border-radius:50%;background:#293b48;display:grid;place-items:center;font:800 15px 'Barlow Condensed';border:2px solid var(--c)}.player-main{flex:1;min-width:0}.player-name{font-weight:700;display:flex;justify-content:space-between}.player-sub{color:var(--muted);font-size:10px;margin:4px 0}.bar{height:5px;background:#34414d;border-radius:5px;overflow:hidden}.bar>i{display:block;height:100%;background:var(--green);width:90%}.tiny{font-size:10px;color:var(--muted)}.divider{height:1px;background:var(--line);margin:17px 0}.statrow{display:flex;justify-content:space-between;align-items:center;margin:10px 0}.statrow b{font-size:11px}.statrow span{font-size:11px;color:var(--muted)}.btn{border:1px solid #465969;color:#e9edf1;background:#253544;border-radius:7px;padding:9px 11px;font-weight:700}.btn:hover{background:#344a5c}.btn.gold{background:var(--gold);color:#17202a;border-color:var(--gold)}.btn.full{width:100%}.btn.small{padding:6px 8px;font-size:11px}.center{display:flex;flex-direction:column;min-width:0}.map-top{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid var(--line);background:#15212b}.map-area{position:relative;height:52%;min-height:300px;background:#1d2b30}.map{position:absolute;inset:0}.map-overlay{position:absolute;top:12px;left:12px;background:#0d1720df;border:1px solid #344854;border-radius:8px;padding:10px 13px;pointer-events:none}.map-overlay strong{font:700 20px 'Barlow Condensed'}.map-controls{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;gap:7px}.map-controls button{background:#101d27e8;color:white;border:1px solid #425563;border-radius:7px;padding:9px 12px}.map-bottom{position:absolute;bottom:12px;left:12px;right:12px;background:#101b25ec;border:1px solid #344854;border-radius:8px;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:10px}.legend{display:flex;gap:9px;flex-wrap:wrap;font-size:10px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px}.story{flex:1;display:flex;flex-direction:column;min-height:280px;background:#0e171f}.story-head{padding:13px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.story-log{padding:16px 19px;overflow:auto;flex:1;line-height:1.7}.story-log p{margin:0 0 12px}.narrator{color:var(--gold);font-weight:700;font-size:10px;letter-spacing:1.2px}.story-entry{padding-bottom:10px;border-bottom:1px solid #26323c;margin-bottom:12px}.action{padding:12px 15px;border-top:1px solid var(--line);display:flex;gap:8px}.action textarea{flex:1;background:#1b2a35;border:1px solid #3a4a57;color:var(--text);border-radius:7px;padding:10px;resize:vertical;min-height:46px;max-height:100px}.tabs{display:flex;gap:4px;margin:12px 0}.tab{flex:1;border:1px solid var(--line);background:#172530;color:var(--muted);padding:8px 4px;border-radius:6px;font-size:11px}.tab.active{background:#334957;color:white}.metric{margin:14px 0}.metric-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px}.metric-label span{color:var(--muted)}.metric .bar{height:7px}.metric .bar i{background:var(--gold)}.info{background:#1b2a35;border:1px solid #30424e;border-radius:9px;padding:11px;margin:10px 0}.info h4{margin:0 0 10px;font-size:12px}.info p{margin:7px 0;color:#b7c4cf;font-size:11px}.inventory-item{display:flex;justify-content:space-between;border-bottom:1px solid #34414b;padding:8px 0}.inventory-item:last-child{border:0}.capacity{background:#33424e;height:9px;border-radius:9px;overflow:hidden;margin:8px 0}.capacity i{display:block;background:#d8b87d;height:100%}.select{background:#1a2a36;border:1px solid #405363;border-radius:7px;color:white;padding:8px;width:100%}.note{font-size:10px;color:var(--muted);line-height:1.6}.hide{display:none!important}.modalback{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:100}.modal{width:min(540px,94vw);background:#15212b;border:1px solid #3d5160;border-radius:12px;padding:20px}.modal h2{font:700 27px 'Barlow Condensed';margin:0 0 6px}.session-row{display:flex;justify-content:space-between;align-items:center;margin:10px 0}.session-row select{width:170px}.marker{width:22px;height:22px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 12px #0009;display:grid;place-items:center;font-size:10px;font-weight:800;color:#0b141b}.waypoint{font-size:23px;text-shadow:0 2px 4px #000}.chip{font-size:10px;color:#9fb3c2;background:#233341;padding:5px 7px;border-radius:5px}.flex{display:flex;gap:7px;align-items:center}.grow{flex:1}@media(max-width:1050px){.grid{grid-template-columns:190px 1fr}.right{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);display:block}.grid{height:auto}.sidebar{min-height:700px}.center{min-height:850px}}@media(max-width:650px){header{padding:0 10px}.brand{font-size:22px}.header-right{gap:6px}.clock{font-size:18px}.grid{display:block}.sidebar{min-height:auto}.center{height:850px}.map-area{height:390px}.right{padding:14px}.map-bottom{flex-direction:column;align-items:flex-start}.map-top{font-size:11px}}
 
 /* Keep the chapter reader unobstructed. */
@@ -499,7 +499,7 @@ header{background:linear-gradient(90deg,#0c1724,#172b3d);border-bottom:1px solid
 .af90-positive,.af90-negative{font-size:10px;line-height:1.5;overflow-wrap:anywhere}.af90-positive{color:#9de9c2}.af90-negative{color:#ffb1ad}
 .af90-route-note{margin-top:12px;color:#b6c8d2;font-size:11px;line-height:1.7;border-top:1px solid #385367;padding-top:10px}
 @media(max-width:600px){.af90-mode-grid{grid-template-columns:1fr}.af90-mode{display:grid;grid-template-columns:30px 1fr;align-items:center}.af90-mode-icon{grid-row:span 4}.af90-travel-heading{display:block}.af90-travel-heading small{display:block;margin-top:6px}}
-</style></head><body><header><div><div class="brand">AFTER<span>FALL</span> <span style="font-size:12px;color:#a5b1bc">/ THE WORLD BEYOND NYC</span></div><div class="sub">MULTIPLAYER SURVIVAL · LIVE CAMPAIGN</div></div><div class="header-right"><span class="pill" id="claimedBadge">● UNCLAIMED</span><div style="text-align:right"><div class="clock" id="clock">21:43</div><div class="tiny" id="date">NOV 12, 2026 · 46°F</div></div><button class="btn small" id="sessionBtn">⚙ LOBBY</button></div></header><main class="grid"><aside class="sidebar"><div class="section-title">SURVIVORS <span id="onlineCount">· 6 ACTIVE</span></div><div id="players"></div><div class="divider"></div><div class="section-title">YOUR CASH</div><div class="cash-widget"><div class="cash-label">PERSONAL WALLET</div><div class="cash-amount" id="sidebarCash">$200.00</div><div class="cash-sub">Physical US dollars · private balance</div><button class="btn small" id="walletShortcut" style="margin-top:10px;width:100%">VIEW WALLET & TRANSACTIONS</button></div><div class="divider"></div><div class="section-title">YOUR CURRENT POSITION</div><div class="info"><h4 id="currentPlace">Midtown Manhattan</h4><p id="locDetails">New York City, New York</p><p>☾ Night · Autumn · Cold</p></div><div class="sidebar-hidden-systems" aria-hidden="true" style="display:none"><div class="section-title">MAP CAMERA</div><div class="info"><h4>🔒 LOCATION LOCKED</h4><p>Shows only the area around your claimed character. The map automatically moves to a new neighborhood when the game engine updates your character's location.</p><p class="note">You cannot switch cities, pan, drag, or scroll the map. Nearby friends appear only when their position is known.</p></div><div class="divider"></div><div class="section-title">CHARACTER & STORY SYSTEMS</div>
+</style></head><body><header><div><div class="brand">THE <span>BOWARDS</span> OF US</div><div class="sub">MULTIPLAYER SURVIVAL · LIVE CAMPAIGN</div></div><div class="header-right"><span class="pill" id="claimedBadge">● UNCLAIMED</span><div style="text-align:right"><div class="clock" id="clock">21:43</div><div class="tiny" id="date">NOV 12, 2026 · 46°F</div></div><button class="btn small" id="sessionBtn">⚙ LOBBY</button></div></header><main class="grid"><aside class="sidebar"><div class="section-title">SURVIVORS <span id="onlineCount">· 6 ACTIVE</span></div><div id="players"></div><div class="divider"></div><div class="section-title">YOUR CASH</div><div class="cash-widget"><div class="cash-label">PERSONAL WALLET</div><div class="cash-amount" id="sidebarCash">$200.00</div><div class="cash-sub">Physical US dollars · private balance</div><button class="btn small" id="walletShortcut" style="margin-top:10px;width:100%">VIEW WALLET & TRANSACTIONS</button></div><div class="divider"></div><div class="section-title">YOUR CURRENT POSITION</div><div class="info"><h4 id="currentPlace">Midtown Manhattan</h4><p id="locDetails">New York City, New York</p><p>☾ Night · Autumn · Cold</p></div><div class="sidebar-hidden-systems" aria-hidden="true" style="display:none"><div class="section-title">MAP CAMERA</div><div class="info"><h4>🔒 LOCATION LOCKED</h4><p>Shows only the area around your claimed character. The map automatically moves to a new neighborhood when the game engine updates your character's location.</p><p class="note">You cannot switch cities, pan, drag, or scroll the map. Nearby friends appear only when their position is known.</p></div><div class="divider"></div><div class="section-title">CHARACTER & STORY SYSTEMS</div>
 
 <button class="btn full" id="eventJournalBtn" style="margin-bottom:8px">⚡ WORLD EVENTS <span id="eventCount">0</span></button>
 <div class="info"><h4>UNEXPECTED EVENTS</h4><p>Dynamic incidents may occur as time passes, while traveling, or during other players' storylines. Not every event needs a choice or a dramatic outcome.</p><p class="note">Demo probability: 18% per 15-minute advance; events are narrative prompts only until connected to the game engine.</p></div>
@@ -1823,6 +1823,9 @@ async function afSubmitTravel(destination){
  if(!target)throw new Error('This destination is not connected to the server travel whitelist yet: '+destination);
  const client=window.afterfallSupabase;
  if(!client)throw new Error('Supabase is not connected. Sign in and reload.');
+ if(afTravelMode==='train')throw new Error('Train service is not yet verified by the game server.');
+ if(afTravelMode==='bike'&&!af91HasItem(/\b(bike|bicycle)\b/i))throw new Error('No usable bicycle in your saved inventory.');
+ if(afTravelMode==='car'&&!af91HasItem(/\b(car|vehicle|truck|van)\b/i))throw new Error('No usable vehicle in your saved inventory.');
  const {error}=await client.rpc('af_live_submit',{p_action:{kind:'travel:penn_station',target,mode:afTravelMode}});
  if(error)throw new Error(error.message);
 }
@@ -1830,21 +1833,106 @@ const afTravelDestinations=["Penn Station, Manhattan, New York", "Grand Central 
 let afLivePosition=null;
 let afTravelMode='walk';
 const afTravelSpeeds={walk:4,bike:12,car:65};
-function afTravelEstimate(dest){const p=afLivePosition;const target=({'Penn Station, Manhattan, New York':{lat:40.7506,lon:-73.9935}})[dest];if(!p||!target)return 'Estimate unavailable';const km=111.2*Math.sqrt((target.lat-p.lat)**2+((target.lon-p.lon)*Math.cos(p.lat*Math.PI/180))**2);const roadKm=km*1.35;const mins=Math.max(5,Math.ceil(roadKm/afTravelSpeeds[afTravelMode]*60));const lo=Math.round(mins*.85),hi=Math.round(mins*1.5);return '~'+lo+'–'+hi+' min (simulation, not live traffic)';}
+const af92Targets={
+ 'Penn Station, Manhattan, New York':[40.7506,-73.9935],
+ 'Grand Central Terminal, Manhattan, New York':[40.7527,-73.9772],
+ 'Port Authority Bus Terminal, Manhattan, New York':[40.7570,-73.9903],
+ 'Jamaica Station, Queens, New York':[40.6996,-73.8085],
+ 'Atlantic Terminal, Brooklyn, New York':[40.6845,-73.9775],
+ 'World Trade Center Station, Manhattan, New York':[40.7115,-74.0114],
+ 'Hicksville Station, Long Island, New York':[40.7688,-73.5251],
+ 'Freeport Station, Long Island, New York':[40.6577,-73.5832],
+ 'Coney Island-Stillwell Avenue, Brooklyn, New York':[40.5773,-73.9812],
+ 'St. George Terminal, Staten Island, New York':[40.6437,-74.0736],
+ 'Newark Penn Station, New Jersey':[40.7347,-74.1644]
+};
+function af92Target(dest){const c=af92Targets[dest];return c?{lat:c[0],lon:c[1]}:null;}
+function afTravelEstimate(dest){return af91Duration(af91Minutes(afTravelMode,dest));}
+function af92RefreshEstimates(root=document){root.querySelectorAll('[data-af-estimate]').forEach(b=>{
+ const d=b.dataset.afEstimate;
+ const prefix=b.dataset.afPrefix||b.textContent.split(' · ')[0];
+ b.dataset.afPrefix=prefix;
+ b.textContent=prefix+' · '+afTravelEstimate(d);
+});}
+// V91: availability-first route planner. Unknown access is NOT treated as ownership.
+const af91Stations=[
+ {name:'Penn Station',lat:40.7506,lon:-73.9935},
+ {name:'Jamaica Station',lat:40.6996,lon:-73.8085},
+ {name:'Grand Central',lat:40.7527,lon:-73.9772},
+ {name:'Atlantic Terminal',lat:40.6845,lon:-73.9775},
+ {name:'Freeport Station',lat:40.6577,lon:-73.5832},
+ {name:'Hicksville Station',lat:40.7688,lon:-73.5251},
+ {name:'Newark Penn Station',lat:40.7347,lon:-74.1644}
+];
+let af91Inventory=[];
+let af91InventoryLoaded=false;
+function af91DistanceKm(a,b){
+ const r=Math.PI/180, dlat=(b.lat-a.lat)*r, dlon=(b.lon-a.lon)*r;
+ const h=Math.sin(dlat/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dlon/2)**2;
+ return 12742*Math.asin(Math.min(1,Math.sqrt(h)));
+}
+function af91Items(){return Array.isArray(af91Inventory)?af91Inventory:[];}
+function af91HasItem(pattern){return af91Items().some(x=>{
+ const name=typeof x==='string'?x:String(x?.name||x?.type||x?.item||'');
+ return pattern.test(name)&&!(x&&typeof x==='object'&&(x.quantity===0||x.condition==='broken'||x.usable===false));
+});}
+function af91NearestStation(){
+ if(!afLivePosition||!Number.isFinite(Number(afLivePosition.lat))||!Number.isFinite(Number(afLivePosition.lon)))return null;
+ const here={lat:Number(afLivePosition.lat),lon:Number(afLivePosition.lon)};
+ return af91Stations.map(s=>({...s,km:af91DistanceKm(here,s)})).sort((a,b)=>a.km-b.km)[0];
+}
+function af91Minutes(mode,dest){
+ const p=afLivePosition, t=af92Target(dest);
+ if(!p||!t||!Number.isFinite(Number(p.lat))||!Number.isFinite(Number(p.lon)))return null;
+ const km=af91DistanceKm({lat:Number(p.lat),lon:Number(p.lon)},t);
+ const speed={walk:4.5,bike:14,car:30,train:45}[mode];
+ if(!speed)return null;
+ const routeFactor=mode==='train'?1.35:mode==='car'?1.5:1.3;
+ return Math.max(5,Math.round(km*routeFactor/speed*60+(mode==='train'?12:mode==='car'?8:0)));
+}
+function af91Duration(n){if(n==null)return 'Awaiting live position';const lo=Math.max(5,Math.round(n*.8)),hi=Math.round(n*1.35);return `~${lo}–${hi} min`;}
+async function af91LoadInventory(){
+ try{
+  const client=window.afterfallSupabase;if(!client)return;
+  const {data:{user}}=await client.auth.getUser();if(!user)return;
+  const {data,error}=await client.from('af_players').select('inventory').eq('user_id',user.id).maybeSingle();
+  if(error)throw error;
+  af91Inventory=Array.isArray(data?.inventory)?data.inventory:[];af91InventoryLoaded=true;
+  document.querySelectorAll('.af90-travel').forEach(w=>{const parent=w.parentElement;if(parent){w.remove();afTravelModePicker(parent)}});
+ }catch(e){console.warn('Travel equipment not verified:',e.message)}
+}
 function afTravelModePicker(el){
  const wrap=document.createElement('section');wrap.className='af90-travel';
- const h=document.createElement('div');h.className='af90-travel-heading';h.innerHTML='<span>ROUTE PLANNER</span><small>CHOOSE YOUR METHOD · EACH HAS A COST</small>';wrap.appendChild(h);
- const modes=[
-  {id:'walk',icon:'🚶',title:'On foot',plus:'Quiet · free · builds endurance',minus:'Fatigue · thirst · hunger · exposure',rate:'4 km/h'},
-  {id:'bike',icon:'🚲',title:'Bicycle',plus:'Quick · quiet · gradual fitness gains',minus:'Higher exertion · falls · punctures',rate:'12 km/h'},
-  {id:'car',icon:'🚙',title:'Vehicle',plus:'Fast · cargo space · some shelter',minus:'Fuel · noise · traffic · collision risk',rate:'65 km/h'}
- ];
+ const heading=document.createElement('div');heading.className='af90-travel-heading';
+ heading.innerHTML='<span>ROUTE PLANNER</span><small>ONLY VERIFIED TRANSPORT · ESTIMATED DURATION</small>';wrap.appendChild(heading);
+ const station=af91NearestStation();
+ const nearStation=station&&station.km<=0.8;
+ const inCity=!!afLivePosition&&Number(afLivePosition.lat)>=40.57&&Number(afLivePosition.lat)<=40.89&&Number(afLivePosition.lon)>=-74.04&&Number(afLivePosition.lon)<=-73.75;
+ const bike=af91InventoryLoaded&&af91HasItem(/\b(bike|bicycle)\b/i);
+ const car=af91InventoryLoaded&&af91HasItem(/\b(car|vehicle|truck|van)\b/i);
+ const modes=[{id:'walk',icon:'🚶',title:'Walking',plus:'Quiet · free · endurance XP',minus:'Fatigue · thirst · hunger · exposure'}];
+ if(bike)modes.push({id:'bike',icon:'🚲',title:'Bicycle',plus:'Quick · quiet · fitness XP',minus:'Dehydration · falls · punctures'});
+ if(car)modes.push({id:'car',icon:'🚙',title:'Driving',plus:'Speed · cargo · shelter',minus:'Fuel · noise · crashes · repairs'});
+ // Nearby station is a real geographic condition, but service must be established in the game world.
+ if(nearStation||inCity)modes.push({id:'train',icon:'🚆',title:'Train · service unverified',plus:'Fast · low exertion',minus:'Fare · delay · service interruption',unavailable:true});
+ if(!modes.some(m=>m.id===afTravelMode&&!m.unavailable))afTravelMode='walk';
+ const dest=String(afLivePosition?.travel_to||'Penn Station, Manhattan, New York');
  const grid=document.createElement('div');grid.className='af90-mode-grid';
- for(const m of modes){const card=document.createElement('button');card.type='button';card.className='af90-mode'+(afTravelMode===m.id?' selected':'');card.innerHTML='<span class="af90-mode-icon">'+m.icon+'</span><strong>'+m.title+'</strong><small>'+m.rate+' baseline</small><span class="af90-positive">+ '+m.plus+'</span><span class="af90-negative">− '+m.minus+'</span>';
- card.onclick=()=>{afTravelMode=m.id;grid.querySelectorAll('.af90-mode').forEach(x=>x.classList.remove('selected'));card.classList.add('selected');el.querySelectorAll('[data-af-estimate]').forEach(b=>b.textContent=afTravelEstimate(b.dataset.afEstimate));};grid.appendChild(card)}
+ for(const m of modes){
+  const card=document.createElement('button');card.type='button';card.className='af90-mode'+(afTravelMode===m.id?' selected':'');
+  const time=af91Duration(af91Minutes(m.id,dest));
+  card.innerHTML='<span class="af90-mode-icon">'+m.icon+'</span><strong>'+m.title+'</strong><small>'+time+' · approximate</small><span class="af90-positive">+ '+m.plus+'</span><span class="af90-negative">− '+m.minus+'</span>';
+  if(m.unavailable){card.disabled=true;card.title='Nearby station found, but train service and fares are not verified by the game server.';card.style.opacity='.65';}
+  else card.onclick=()=>{afTravelMode=m.id;grid.querySelectorAll('.af90-mode').forEach(x=>x.classList.remove('selected'));card.classList.add('selected');af92RefreshEstimates(el);};
+  grid.appendChild(card);
+ }
  wrap.appendChild(grid);
- const note=document.createElement('div');note.className='af90-route-note';note.textContent='Walking needs no vehicle. Bicycle and car require actual access and supplies; selection does not create them. Estimates are approximate and not live routing. Resource changes require the server V90 migration.';wrap.appendChild(note);el.appendChild(wrap);
+ const note=document.createElement('div');note.className='af90-route-note';
+ note.textContent=(nearStation?'Nearby: '+station.name+' ('+Math.round(station.km*1000)+' m). ':inCity?'NYC urban transit area: subway/train option shown; nearest station and service not yet verified. ':'')+(af91InventoryLoaded?'Equipment checked against saved inventory. ':'Checking saved equipment; unavailable vehicles are hidden. ')+'Times are geographic estimates, not live routes. Server-side resource and fare enforcement still requires an update.';
+ wrap.appendChild(note);el.appendChild(wrap);
+ if(!af91InventoryLoaded&&!af91LoadInProgress){af91LoadInProgress=true;af91LoadInventory().finally(()=>{af91LoadInProgress=false})}
 }
+let af91LoadInProgress=false;
 
 
 let afAIScene=null, afAIKey='', afAIBusy=false, afAIBeats=[], afAIDraft='';
@@ -2301,7 +2389,7 @@ function render(s){
  const savedY=window.scrollY;
  const savedFocus=active&&active.id;
 
- turn=s.turn;const pos=s.position;afLivePosition=pos||null;if(pos)mapPosition(pos);journal(s.events);$('onlineCount').textContent='· '+s.participants+' ROSTER PARTICIPANTS (INCLUDES NPCS)';
+ turn=s.turn;const pos=s.position;afLivePosition=pos||null;if(pos)mapPosition(pos);af92RefreshEstimates();journal(s.events);$('onlineCount').textContent='· '+s.participants+' ROSTER PARTICIPANTS (INCLUDES NPCS)';
  $('afLiveChoices').replaceChildren();$('chapterBook').textContent='Live campaign chronicle is shown below. Your private actions are not shared with other survivors.';const st=s.survival||{};const stats=$('afV52Survival');
  if(pos?.travel_to){const travel=document.createElement('p');travel.className='af-free-label';travel.textContent='CURRENT ROUTE · '+pos.label+' · Destination: '+pos.travel_to; $('afLiveChoices').appendChild(travel)}if(stats){stats.textContent=st.health===undefined?'SURVIVAL · Waiting for Day 1':'SURVIVAL · Health '+st.health+' · Food '+st.food+' · Water '+st.water+' · Medicine '+st.medicine+' · Fatigue '+st.fatigue+' · Stress '+st.stress;}
  if(!turn){$('afLiveTitle').textContent='WAITING TO START · LIVE LOBBY';msg(s.participants+' survivors have completed their profiles. All six must have completed surveys or be assigned automatic NPCs before starting.');if(name.toLowerCase()==='mikel'){
@@ -2438,7 +2526,7 @@ async function updateWeather(){const title=document.getElementById('afLiveTitle'
 try{const w=await rpc('af_v80_weather',{p_turn:n});const surv=document.getElementById('afV52Survival');if(surv&&w){let badge=document.getElementById('afV80Weather');if(!badge){badge=document.createElement('div');badge.id='afV80Weather';badge.style.cssText='margin:8px 0;color:#c8d5de;font-size:13px';surv.insertAdjacentElement('afterend',badge)}badge.textContent='WEATHER · '+String(w.condition).replace('_',' ').toUpperCase()+' · Severity '+w.severity+'/5 · NYC metro simulation';}}
 catch(e){}if(n!==lastTurn){lastTurn=n;try{const changes=await rpc('af_v80_my_day_changes',{p_turn:n-1});const book=document.getElementById('chapterBook');if(!book)return;let panel=document.getElementById('afV80Day');if(panel)panel.remove();panel=document.createElement('div');panel.id='afV80Day';panel.className='af-v80-day';const h=document.createElement('h4');h.textContent='DAY '+(n-1)+' · ATTRIBUTE UPDATES';panel.appendChild(h);if(!changes?.length){const p=document.createElement('p');p.textContent='No tracked driving changes from the previous day.';panel.appendChild(p)}else for(const c of changes){const p=document.createElement('p');p.textContent=c.stat+' '+(c.delta>0?'+':'')+c.delta+' · '+c.reason;panel.appendChild(p)}book.insertAdjacentElement('afterend',panel)}catch(e){}}}
 document.addEventListener('click',e=>{if(e.target?.closest?.('[data-tab="personality"]'))setTimeout(showProfile,80)});
-setInterval(()=>{const choices=document.getElementById('afLiveChoices');if(choices&&!document.getElementById('afV80TravelMode')&&/travel|station|route/i.test(choices.textContent||'')){const sel=document.createElement('select');sel.id='afV80TravelMode';sel.style.cssText='padding:8px;margin:8px;color:#fff;background:#19272c;border:1px solid #6c7b7d';sel.innerHTML='<option value=walking>Travel on foot (no driving crash roll)</option><option value=driving>Drive (weather and skill affect crash risk)</option>';sel.onchange=()=>window.afV80TravelMode=sel.value;choices.prepend(sel)}if(document.getElementById('afV80Personality')&&!profile)showProfile();updateWeather()},5500);
+setInterval(()=>{if(document.getElementById('afV80Personality')&&!profile)showProfile();updateWeather()},5500);
 })();</script>
 <style id="af-v81-perks-style">.af-perk{padding:11px 0;border-bottom:1px solid #425052}.af-perk-top{display:flex;justify-content:space-between;gap:10px;font-weight:700}.af-perk-track{height:6px;background:#27383d;border-radius:6px;overflow:hidden;margin-top:7px}.af-perk-fill{height:100%;background:#b9a174}.af-perk-desc{font-size:12px;opacity:.83;margin-top:4px}</style>
 <script id="af-v81-perks">(()=>{'use strict';
