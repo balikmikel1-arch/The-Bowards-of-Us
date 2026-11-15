@@ -1849,7 +1849,7 @@ function afAIChoiceUI(){
    b.onclick=()=>{chosen=option.id;afAIChoiceUI()};el.appendChild(b);
   }
  }
- if(!isWritten){
+ {
   const current=String(afLivePosition?.label||'');
   const isHub=/Penn Station|Grand Central|Port Authority|Jamaica Station|Atlantic Terminal|World Trade Center Station|Hicksville Station|Freeport Station|Stillwell Avenue|St. George Terminal|Newark Penn Station/i.test(current);
   const onWay=String(afLivePosition?.travel_to||'');
@@ -1864,12 +1864,18 @@ function afAIChoiceUI(){
   for(const dest of targets){
    const b=document.createElement('button');b.className='af-choice af-ai-choice af-travel-choice'+(chosen==='travel|'+dest?' active':'');
    b.textContent=(onWay===dest?'Continue toward ':'Travel toward ')+dest;
-   b.onclick=()=>{chosen='travel|'+dest;afAIChoiceUI()};el.appendChild(b);
+   b.onclick=()=>{chosen='travel|'+dest;el.querySelectorAll('.af-travel-choice').forEach(x=>x.classList.remove('active'));b.classList.add('active');};el.appendChild(b);
   }
  }
  const submit=document.createElement('button');submit.className='af-live-button af-ai-choice';submit.textContent='COMMIT DECISION · END DAY';submit.disabled=pending||(!isWritten&&!chosen);
  submit.onclick=async()=>{
   let option;
+  if(String(chosen||'').startsWith('travel|')){
+   const dest=chosen.slice(7);pending=true;submit.disabled=true;
+   try{await afSubmitTravel(dest);msg('Travel submitted. Actual movement resolves on the server.');await refresh()}
+   catch(e){msg('Travel failed: '+e.message);alert('Travel failed: '+e.message)}finally{pending=false}
+   return;
+  }
   if(isWritten){
    const text=afAIDraft.trim();if(!text){msg('Write your answer first.');return;}
    const destination=afTravelDestinations.find(x=>text.toLowerCase().includes(x.toLowerCase().split(',')[0])) ||
@@ -1998,8 +2004,10 @@ const msg=x=>{$('afLiveMessage').textContent=x};
 async function rpc(fn,args={}){const {data,error}=await c().rpc(fn,args);if(error)throw new Error(error.message);return data}
 function mapPosition(position){
  const lat=Number(position?.lat),lon=Number(position?.lon);if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
- const label=position.label||'Unknown location';$('currentPlace').textContent=label;$('profileLocation').textContent=label+' · Your position';$('locDetails').textContent='Server-saved position · '+lat.toFixed(4)+', '+lon.toFixed(4);$('areaTitle').textContent=label.toUpperCase();$('mapState').textContent='LIVE · YOUR POSITION';
- const key=lat+','+lon;if(lastLocation===key)return;lastLocation=key;
+ const label=position.label||'Unknown location';$('currentPlace').textContent=label;$('profileLocation').textContent=label+' · Your position';$('locDetails').textContent='Server-saved position · '+lat.toFixed(4)+', '+lon.toFixed(4);$('areaTitle').textContent=label.toUpperCase();$('mapState').textContent=position.travel_to?'TRAVEL IN PROGRESS · SERVER POSITION':'LIVE · SERVER POSITION';
+ const key=lat+','+lon+','+label;
+ if(lastLocation&&lastLocation!==key){afAIScene=null;afAIKey='';afAIBeats=[];afAIDraft='';afV85LastRenderKey='';}
+ if(lastLocation===key)return;lastLocation=key;
  const frame=$('mapFrame');const d=.045;frame.src='https://www.openstreetmap.org/export/embed.html?bbox='+encodeURIComponent([lon-d,lat-d,lon+d,lat+d].join(','))+'&layer=mapnik&marker='+encodeURIComponent(lat+','+lon);
  $('mapExternal').href='https://www.openstreetmap.org/?mlat='+lat+'&mlon='+lon+'#map=13/'+lat+'/'+lon;
  if(window.maplibregl){try{
@@ -2008,7 +2016,7 @@ function mapPosition(position){
    privateMap._afMarker=new maplibregl.Marker({color:'#e8bc7c'}).setLngLat([lon,lat]).addTo(privateMap);
    privateMap.on('error',()=>{if(!mapOk){$('mapFallback').classList.add('af-show-fallback');div.style.display='none'}});
    privateMap.on('idle',()=>{mapOk=true;$('mapFallback').classList.remove('af-show-fallback')});
-  }else{privateMap.easeTo({center:[lon,lat],zoom:12.8,duration:700});const marker=privateMap._afMarker;if(marker)marker.setLngLat([lon,lat])}
+  }else{privateMap.easeTo({center:[lon,lat],duration:450});const marker=privateMap._afMarker;if(marker)marker.setLngLat([lon,lat])}
   privateMap.resize();$('mapFallback').classList.remove('af-show-fallback');return;
  }catch(e){console.warn('Private map fallback',e)}}
  $('mapFallback').classList.add('af-show-fallback');
@@ -2016,27 +2024,35 @@ function mapPosition(position){
 
 // Tense decisions are short beats inside one shared turn; only the final action is submitted.
 function afTenseScene(){
- const n=Math.max(1,Number(turn?.turn_number)||1),who=String(name||'').toLowerCase();
- // Pressure builds quickly; later days bring more frequent threats.
+ const n=Math.max(1,Number(turn?.turn_number)||1);
  if(n<3 || (n<7?n%3!==0:n%2!==0))return null;
- const places={mikel:'a Merrick side street',avery:'a crowded Long Island storefront',daniel:'a Canarsie apartment corridor',bryce:'a Brooklyn service alley',howard:'a dim Sunset Park stairwell',curtis:'a Staten Island ferry access road'};
- const place=places[who]||'a narrow street';
+ const pos=afLivePosition;
+ if(!pos||!Number.isFinite(Number(pos.lat))||!Number.isFinite(Number(pos.lon)))return null;
+ const label=String(pos.label||'').trim();
+ if(!label)return null;
+ const moving=Boolean(pos.travel_to)||/^On the road toward/i.test(label);
+ const station=/Penn Station/i.test(label)&&!moving;
+ const place=moving?'along your current route toward '+String(pos.travel_to||'your destination'):station?'inside Penn Station, Manhattan': 'near '+label;
  const infected=n>=8;
- const openings=infected?[
- `At ${place}, a figure jerks against a locked gate. Its breathing comes in harsh bursts. When a bottle breaks nearby, its head snaps toward the sound. A second shape moves behind it.`,
- `At ${place}, a person with gray mottling across their neck stumbles into view. They stop, listening. A wet clicking noise comes from the dark behind them.`,
- `At ${place}, a survivor bangs on a door. Something strikes the other side hard enough to bend the latch. A second impact comes from a different direction.`
+ const openings=station?(infected?[
+ `Inside Penn Station, ${name} hears a sharp crash near a corridor. A frightened crowd pulls away from the noise. You cannot yet see what caused it.`,
+ `On the Penn Station concourse, a commuter stumbles near the stairs and people suddenly back away. It is not clear whether the person is sick or injured.`
  ]:[
- `At ${place}, an argument turns into a stampede. Someone falls. A security shutter begins closing as the crowd pushes toward it.`,
- `At ${place}, the lights go out and an emergency alarm starts. A person screams from the next room. You cannot see what caused it.`,
- `At ${place}, a vehicle hits a barrier. Smoke spreads and people rush into the road without looking.`
+ `Inside Penn Station, a sudden announcement is cut short. Passengers begin crowding toward a staircase, and the flow of people becomes dangerous.`,
+ `Near the Penn Station concourse, a security gate drops unexpectedly. People scramble to find an alternate exit.`
+ ]):moving?[
+ `While traveling ${place}, a disruption blocks the way ahead. You must assess whether to stop, retreat, or look for another route.`,
+ `Along your route, a crowd gathers near an obstruction. You cannot tell from here what caused it.`
+ ]:infected?[
+ `At ${place}, a figure moves erratically near an entrance. Others back away, but the cause is uncertain.`,
+ `At ${place}, a distant crash and hurried footsteps interrupt the quiet. You have not confirmed the source.`
+ ]:[
+ `At ${place}, a crowd suddenly surges toward an exit. Someone falls and the passage begins to clog.`,
+ `At ${place}, an alarm sounds and nearby people start moving quickly without clear instructions.`
  ];
- return {place,infected,opening:openings[(n+Object.keys(places).indexOf(who)+6)%openings.length],beats:infected?[
- ['Back away silently and search for another exit','Draw its attention away from the trapped survivor','Barricade the nearest door before it notices you'],
- ['Escape while the path is clear','Try to guide the survivor out without getting close','Stay hidden and listen for more movement']
- ]:[
- ['Move to a safe exit','Call out to find who needs help','Get behind cover and assess the danger'],
- ['Leave the area','Help from a safe distance','Wait until the crowd clears']
+ return {place,infected,opening:openings[n%openings.length],beats:[
+ ['Move toward a safer exit','Ask nearby people what happened','Stay back and assess the situation'],
+ ['Continue only if the route is clear','Help someone nearby without rushing into danger','Wait and observe before committing']
  ]};
 }
 
@@ -2088,16 +2104,16 @@ function choiceUI(){
  }else actions=choicesForTurn();
  if(n===1&&!tense&&!freeMode&&!dialogueMode){actions=actions.map(([k,label])=>[k,k==='hold'?'Contact the others and suggest Penn Station as a meeting point':label]);}
  for(const [key,label] of actions){const b=document.createElement('button');b.className='af-choice'+(chosen===key?' active':'');b.textContent=label;b.onclick=()=>{chosen=key;choiceUI()};el.appendChild(b)}
- if(!tense&&!freeMode){
+ {
   const onWay=String(afLivePosition?.travel_to||'');
   const isHub=/Penn Station|Grand Central|Port Authority|Jamaica Station|Atlantic Terminal|World Trade Center Station|Hicksville Station|Freeport Station|Stillwell Avenue|St. George Terminal|Newark Penn Station/i.test(String(afLivePosition?.label||''));
   const destinations=onWay?[onWay,...afTravelDestinations.filter(x=>x!==onWay).slice(0,3)]:isHub?afTravelDestinations.filter(x=>x!==afLivePosition.label):n===1?[afTravelDestinations[0],afTravelDestinations[3]]:afTravelDestinations.slice(0,4);
   const heading=document.createElement('p');heading.className='af-free-label';heading.textContent=isHub?'ONWARD TRAVEL · Leave this station':onWay?'CONTINUE OR CHANGE YOUR ROUTE':'TRAVEL TO ANOTHER LOCATION';el.appendChild(heading);
-  for(const dest of destinations){const b=document.createElement('button');b.className='af-choice'+(chosen==='travel|'+dest?' active':'');b.textContent=(dest===onWay?'Continue to ':'Travel to ')+dest;b.onclick=()=>{chosen='travel|'+dest;choiceUI()};el.appendChild(b)}
+  for(const dest of destinations){const b=document.createElement('button');b.className='af-choice'+(chosen==='travel|'+dest?' active':'');b.textContent=(dest===onWay?'Continue to ':'Travel to ')+dest;b.onclick=()=>{chosen='travel|'+dest;el.querySelectorAll('.af-choice').forEach(x=>x.classList.remove('active'));b.classList.add('active')};el.appendChild(b)}
  }
  const submit=document.createElement('button');submit.className='af-live-button';submit.textContent=tense&&afTenseState.step===0?'CONTINUE · SECONDS PASS':'LOCK IN DECISION · END DAY';submit.disabled=pending||(!freeMode&&!chosen);
  submit.onclick=async()=>{
-  if(freeMode){const v=el.querySelector('.af-free-text')?.value.trim();if(!v){msg('Write your response before locking in.');return}if(v.length>350)return;chosen=/\b(rest|sleep|recover|hide|shelter)\b/i.test(v)?'rest':/\b(search|scavenge|supplies|food|water|medicine)\b/i.test(v)?'scavenge':'hold';}
+  if(freeMode&&!String(chosen||'').startsWith('travel|')){const v=el.querySelector('.af-free-text')?.value.trim();if(!v){msg('Write your response before locking in.');return}if(v.length>350)return;chosen=/\b(rest|sleep|recover|hide|shelter)\b/i.test(v)?'rest':/\b(search|scavenge|supplies|food|water|medicine)\b/i.test(v)?'scavenge':'hold';}
   if(!chosen)return;
   if(String(chosen).startsWith('travel|')){
    pending=true;submit.disabled=true;
@@ -2152,9 +2168,11 @@ function afStoryChapter(turn,survivor,location,events){
  ];
  const seed=[...who].reduce((a,c)=>a+c.charCodeAt(0),0);
  const lead=sceneLeads[(n*7+seed)%sceneLeads.length];
+ const relocated=/Penn Station|Manhattan|Jamaica|Queens|Brooklyn|Newark|Philadelphia|On the road/i.test(place);
+ const localEpisode=relocated?['SITUATION REPORT',`At ${place}, you assess the immediate surroundings rather than assuming reports from another neighborhood describe what is happening here.`,`You hear conflicting updates about the wider region. None confirms an immediate threat at your position.`,`The next decision depends on the people, exits and resources actually present at this location.`]:episode;
  const opener=n===1?`In ${place}, the first alerts interrupt an otherwise ordinary day.`:
   recent?`${lead} Your latest recorded experience: ${recent}`:lead;
- return [`DAY ${n} · ${place.toUpperCase()}`,`${who.toUpperCase()} · ${n>16?'FOLLOW-UP: ':''}${episode[0]}`,opener,...(escalation?[escalation]:[]),episode[1],episode[2],episode[3],...(previous.length?['PREVIOUSLY RECORDED\n'+previous[0]]:[])].join('\n\n');
+ return [`DAY ${n} · ${place.toUpperCase()}`,`${who.toUpperCase()} · ${n>16?'FOLLOW-UP: ':''}${localEpisode[0]}`,opener,...(escalation?[escalation]:[]),localEpisode[1],localEpisode[2],localEpisode[3],...(previous.length?['PREVIOUSLY RECORDED\n'+previous[0]]:[])].join('\n\n');
 }
 
 const afNewsFallback={headline:'Official information remains limited',body:'Local services continue to operate. Officials ask residents to verify reports before sharing them.'};
@@ -2169,7 +2187,7 @@ function afSharedChapter(turn,ctx){
  const n=Math.max(1,Number(turn?.turn_number)||1),ep=afEpisode(turn);
  const members=(ctx?.group?.members||[]).slice().sort();
  const news=ctx?.news||afNewsFallback;
- return [`DAY ${n} · SHARED SCENE`,`${ctx?.group?.name||'The group'} · ${members.join(', ')}`,ep[0],ep[1],ep[2],ep[3],`PUBLIC BROADCAST · ${news.headline}\n${news.body}`,'Everyone present witnesses the same incident. Individual decisions can still differ.'].join('\n\n');
+ return [`DAY ${n} · SHARED SCENE`,`${ctx?.group?.name||'The group'} · ${members.join(', ')}`,ep[0],ep[1],ep[2],ep[3],`PUBLIC BROADCAST · ${news.headline}\n${news.body}`,'These are regional reports; characters in different places do not automatically witness the same local incident.'].join('\n\n');
 }
 
 function afWorldStory(turn,survivor,location,events,ctx){
@@ -2271,6 +2289,18 @@ let busy=false;async function refresh(){if(busy||!c())return;busy=true;try{
  }
  try{afSharedContext=await rpc('af_story_context')}catch(contextError){afSharedContext=null;console.warn('Shared story unavailable:',contextError.message)}render(snapshot)}catch(e){$('afLiveTitle').textContent='MULTIPLAYER CONNECTION ERROR';msg(e.message+' · Copy this exact error for troubleshooting.')} 
  }catch(e){msg('Connection error: '+e.message)}finally{busy=false}}
+ // Keep zoom controls on the actual server-backed map, never the hidden Merrick demo map.
+ for(const [id,delta] of [['zoomIn',0.7],['zoomOut',-0.7]]){
+  const button=$(id);
+  button?.addEventListener('click',event=>{
+   if(!document.body.classList.contains('af-live-ready'))return;
+   event.preventDefault();event.stopImmediatePropagation();
+   if(privateMap){privateMap.zoomTo(Math.max(3,Math.min(18,privateMap.getZoom()+delta)),{duration:250});}
+   else {msg('Live map tiles unavailable. Use OPEN FULL MAP to zoom at your saved position.');}
+  },true);
+ }
+ // Never silently replace the saved position with a guessed station.
+ window.afV88PositionCheck=()=>({serverPosition:afLivePosition,displayedLabel:$('currentPlace')?.textContent});
  setInterval(refresh,4000);setTimeout(refresh,1400);
 })();
 </script><style id="af-synced-admin-style">body.af-live-ready #sessionBtn{display:inline-flex!important}#modalback{z-index:10050!important}#afAdminStatus{font-size:11px;line-height:1.6;color:#c5d6d9;margin:10px 0}#modalback .modal{max-height:90vh;overflow:auto}</style><script id="af-synced-admin">
