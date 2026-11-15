@@ -479,7 +479,7 @@ body #afLiveChoices textarea {font-size:16px!important;line-height:1.6!important
 
 <button class="btn full" id="eventJournalBtn" style="margin-bottom:8px">⚡ WORLD EVENTS <span id="eventCount">0</span></button>
 <div class="info"><h4>UNEXPECTED EVENTS</h4><p>Dynamic incidents may occur as time passes, while traveling, or during other players' storylines. Not every event needs a choice or a dramatic outcome.</p><p class="note">Demo probability: 18% per 15-minute advance; events are narrative prompts only until connected to the game engine.</p></div>
-<div class="divider"></div><div class="section-title">CAMPAIGN COMMANDS</div><div class="flex" style="flex-wrap:wrap"><button class="btn small" id="saveBtn">SAVE</button><button class="btn small" id="pauseBtn">PAUSE</button><button class="btn small" id="recapBtn">RECAP</button><button class="btn small" id="nextBtn">+ 15 MIN</button></div><p class="note">The demo saves locally in this browser. Multiplayer, AI generation, accounts, and shared saves require a backend.</p></div></aside><section class="center"><div class="map-dock"><div class="map-top"><div><b>◈ TACTICAL MAP</b> <span class="tiny">/ UNITED STATES · LOCAL VIEW</span></div><span class="chip" id="mapState">WAYPOINT MODE: OFF</span></div><div class="map-area"><div class="map" id="map" style="display:none"></div><div id="mapFallback" class="map-fallback"><iframe id="mapFrame" title="Real neighborhood street map" loading="eager" referrerpolicy="no-referrer" allowfullscreen></iframe><div class="map-fallback-dot">● YOU</div><div class="map-fallback-label">OPENSTREETMAP · FIXED LOCAL VIEW</div><a id="mapExternal" class="map-external" target="_blank" rel="noopener noreferrer">OPEN FULL MAP ↗</a></div><div class="map-overlay"><strong id="areaTitle">MIDTOWN</strong></div><div class="map-controls"><button id="zoomIn" title="Zoom in">＋</button><button id="zoomOut" title="Zoom out">－</button><button id="wpBtn" title="Waypoints require the live map engine" disabled style="display:none">⌖</button><button id="clearWp" title="Clear waypoints" disabled style="display:none">×</button></div><div class="map-bottom"><div class="legend" id="legend"></div><div class="tiny" id="waypointText">Local map · locked to your character</div></div></div><section class="chapter-library" aria-label="Campaign chronicle"><div class="chapter-library-head"><div><span class="sub">CAMPAIGN CHRONICLE</span><h3>THE LIVING STORY</h3></div><span class="chronicle-live">● LIVE CHAPTER</span></div><div class="chronicle-explainer">One shared main campaign for all seven survivors. Each player can experience their own side plots without rewriting the group's history.</div><div id="afV83DailyChronicle" class="af-v83-chronicle" aria-label="Daily story summaries"></div><div class="chronicle-current" id="chronicleCurrent"><div class="chronicle-kicker">CURRENT WEEK · MAIN STORY</div><div class="chapter-book" id="chapterBook" tabindex="0" aria-label="Scrollable current chapter"><p class="book-empty">The story begins here.</p></div></div><details id="pastChapters" class="past-chapters"><summary>PREVIOUS CHAPTERS <span id="pastCount">0 archived</span></summary><div id="pastChapterList" class="past-chapter-list"></div></details></section></div><div class="story"><div class="story-head"><div><div class="narrator">CHAPTER 01 · THE ORDINARY DAY</div><b id="sceneTitle">A City That Keeps Moving</b></div><span class="tiny">YOUR CHARACTER · STORY</span></div><div id="sceneGate" class="scene-gate"><div class="gate-top"><strong>SCENE SYNC · WAITING FOR PLAYERS</strong><span id="gateStatus">0 / 6 READY</span></div><div id="readyRoster" class="ready-roster"></div><div class="gate-actions"><button id="readyScene" class="btn gold small">✓ I'M READY</button><button id="demoRemote" class="btn small">SIMULATE OTHER PLAYERS (DEMO)</button></div><div class="gate-help" id="gateHelp">Each active player must confirm. Remote confirmations require a multiplayer server; simulation is for preview only.</div></div><div id="choicePanel" class="choice-panel"><div class="choice-head"><span id="choiceType">CHOICE MOMENT</span><strong id="choiceTitle">What do you do?</strong></div><p id="choicePrompt"></p><div id="choiceOptions"></div><textarea id="choiceAnswer" placeholder="Describe your character's decision..."></textarea><div class="gate-actions"><button class="btn gold" id="submitChoice">LOCK IN MY DECISION</button><span id="choiceFeedback" class="gate-help"></span></div></div><div class="story-tools"><button class="btn small gold" id="continueStory">▶ CONTINUE STORY</button><span class="pacing-hint">Dialogue flows automatically · choices only when meaningful</span></div><div class="story-log" id="log"><div class="story-entry"><div class="narrator">GAME MASTER · 9:43 PM</div>
+<div class="divider"></div><div class="section-title">CAMPAIGN COMMANDS</div><div class="flex" style="flex-wrap:wrap"><button class="btn small" id="saveBtn">SAVE</button><button class="btn small" id="pauseBtn">PAUSE</button><button class="btn small" id="recapBtn">RECAP</button><button class="btn small" id="nextBtn">+ 15 MIN</button></div><p class="note">The demo saves locally in this browser. Multiplayer, AI generation, accounts, and shared saves require a backend.</p></div></aside><section class="center"><div class="map-dock"><div class="map-top"><div><b>◈ TACTICAL MAP</b> <span class="tiny">/ UNITED STATES · LOCAL VIEW</span></div><span class="chip" id="mapState">WAYPOINT MODE: OFF</span></div><div class="map-area"><div class="map" id="map" style="display:none"></div><div id="mapFallback" class="map-fallback"><iframe id="mapFrame" title="Real neighborhood street map" loading="eager" referrerpolicy="no-referrer" allowfullscreen></iframe><div class="map-fallback-dot">● YOU</div><div class="map-fallback-label">OPENSTREETMAP · FIXED LOCAL VIEW</div><a id="mapExternal" class="map-external" target="_blank" rel="noopener noreferrer">OPEN FULL MAP ↗</a></div><div class="map-overlay"><strong id="areaTitle">MIDTOWN</strong></div><div class="map-controls"><button id="zoomIn" title="Zoom in">＋</button><button id="zoomOut" title="Zoom out">－</button><button id="wpBtn" title="Waypoints require the live map engine" disabled style="display:none">⌖</button><button id="clearWp" title="Clear waypoints" disabled style="display:none">×</button></div><div class="map-bottom"><div class="legend" id="legend"></div><div class="tiny" id="waypointText">Local map · locked to your character</div></div></div><section class="chapter-library" aria-label="Campaign chronicle"><div class="chapter-library-head"><div><span class="sub">CAMPAIGN CHRONICLE</span><h3>THE LIVING STORY</h3></div><span class="chronicle-live">● LIVE CHAPTER</span></div><div class="chronicle-explainer">One shared main campaign for all seven survivors. Each player can experience their own side plots without rewriting the group's history.</div><button type="button" id="afV85ReloadHistory" class="btn small" style="margin:8px 0" onclick="window.afV85ReloadHistory&&window.afV85ReloadHistory()">REFRESH SAVED HISTORY</button><div id="afV83DailyChronicle" class="af-v83-chronicle" aria-label="Saved story history"></div><div class="chronicle-current" id="chronicleCurrent"><div class="chronicle-kicker">CURRENT WEEK · MAIN STORY</div><div class="chapter-book" id="chapterBook" tabindex="0" aria-label="Scrollable current chapter"><p class="book-empty">The story begins here.</p></div></div><details id="pastChapters" class="past-chapters"><summary>PREVIOUS CHAPTERS <span id="pastCount">0 archived</span></summary><div id="pastChapterList" class="past-chapter-list"></div></details></section></div><div class="story"><div class="story-head"><div><div class="narrator">CHAPTER 01 · THE ORDINARY DAY</div><b id="sceneTitle">A City That Keeps Moving</b></div><span class="tiny">YOUR CHARACTER · STORY</span></div><div id="sceneGate" class="scene-gate"><div class="gate-top"><strong>SCENE SYNC · WAITING FOR PLAYERS</strong><span id="gateStatus">0 / 6 READY</span></div><div id="readyRoster" class="ready-roster"></div><div class="gate-actions"><button id="readyScene" class="btn gold small">✓ I'M READY</button><button id="demoRemote" class="btn small">SIMULATE OTHER PLAYERS (DEMO)</button></div><div class="gate-help" id="gateHelp">Each active player must confirm. Remote confirmations require a multiplayer server; simulation is for preview only.</div></div><div id="choicePanel" class="choice-panel"><div class="choice-head"><span id="choiceType">CHOICE MOMENT</span><strong id="choiceTitle">What do you do?</strong></div><p id="choicePrompt"></p><div id="choiceOptions"></div><textarea id="choiceAnswer" placeholder="Describe your character's decision..."></textarea><div class="gate-actions"><button class="btn gold" id="submitChoice">LOCK IN MY DECISION</button><span id="choiceFeedback" class="gate-help"></span></div></div><div class="story-tools"><button class="btn small gold" id="continueStory">▶ CONTINUE STORY</button><span class="pacing-hint">Dialogue flows automatically · choices only when meaningful</span></div><div class="story-log" id="log"><div class="story-entry"><div class="narrator">GAME MASTER · 9:43 PM</div>
  <p>Midtown is still crowded. A delivery cyclist cuts across traffic, two tourists argue over directions, and a police cruiser crawls through the intersection with its lights off.</p>
  <p>A public bulletin reports unusually high emergency call volume. The cause is not confirmed.</p>
  
@@ -2169,42 +2169,66 @@ function afWorldStory(turn,survivor,location,events,ctx){
  return base+'\n\n'+'PUBLIC BROADCAST · '+news.headline+'\n'+news.body+(twist?'\n\n'+twist[0]+'\n'+twist[1]:'');
 }
 function journal(events){const entries=(events||[]).slice().reverse();$('afLiveJournal').innerHTML='<div class="sub">YOUR PRIVATE CHRONICLE</div>'+ (entries.length?entries.map(e=>'<p><b>Turn '+Number(e.turn_number)+'</b> · '+esc(e.body)+'</p>').join(''):'<p>Your own consequences will appear here after the first completed turn.</p>')}
+window.afV85ReloadHistory=()=>{afV85LastChronicleSignature='';return afV85FetchHistory(true)};
+let afV85History=[],afV85HistoryStatus='Loading saved history…',afV85LastHistoryFetch=0;
+let afV85LastChronicleSignature='';
+async function afV85FetchHistory(force=false){
+ if(!userId||!c())return;
+ if(!force&&Date.now()-afV85LastHistoryFetch<20000)return;
+ afV85LastHistoryFetch=Date.now();
+ try{
+  const {data,error}=await c().from('af_live_journal').select('*').eq('user_id',userId).order('turn_number',{ascending:true}).limit(1000);
+  if(error)throw error;
+  afV85History=data||[];
+  afV85HistoryStatus=afV85History.length?'':'No earlier journal records are accessible for this character.';
+ }catch(e){afV85HistoryStatus='Could not load older journal entries: '+e.message;}
+ afV83DailyChronicle(afV85LatestSnapshot);
+}
+let afV85LatestSnapshot=null;
 function afV83DailyChronicle(snapshot){
  const host=document.getElementById('afV83DailyChronicle');if(!host)return;
- const current=Math.max(1,Number(snapshot?.turn?.turn_number)||1);
- const events=Array.isArray(snapshot?.events)?snapshot.events:[];
- const byDay=new Map();
+ if(snapshot)afV85LatestSnapshot=snapshot;
+ const current=Math.max(1,Number(afV85LatestSnapshot?.turn?.turn_number)||1);
+ const events=[...(Array.isArray(afV85LatestSnapshot?.events)?afV85LatestSnapshot.events:[]),...afV85History];
+ const byTurn=new Map();
  for(const e of events){
-  const day=Number(e.turn_number);
-  if(!Number.isInteger(day)||day<1||day>current)continue;
-  const entry=String(e.entry??e.description??e.text??e.message??'').trim();
+  const n=Number(e.turn_number);if(!Number.isInteger(n)||n<1)continue;
+  const entry=String(e.body??e.entry??e.description??e.text??e.message??'').trim();
   if(!entry)continue;
-  if(!byDay.has(day))byDay.set(day,[]);
-  if(!byDay.get(day).includes(entry))byDay.get(day).push(entry);
+  if(!byTurn.has(n))byTurn.set(n,[]);
+  if(!byTurn.get(n).includes(entry))byTurn.get(n).push(entry);
  }
+ const signature=JSON.stringify([current,Array.from(byTurn),afV85HistoryStatus]);
+ if(signature===afV85LastChronicleSignature)return;
+ afV85LastChronicleSignature=signature;
+ const openTurns=new Set(Array.from(host.querySelectorAll('details[open]')).map(d=>Number(d.dataset.turn)));
  const fragment=document.createDocumentFragment();
- for(let day=1;day<=current;day++){
-  const section=document.createElement('details');section.className='af-v83-day';
-  if(day===current)section.open=true;
-  const summary=document.createElement('summary');summary.textContent='DAY '+day+(day===current?' · IN PROGRESS':' · SUMMARY');section.appendChild(summary);
-  const entries=byDay.get(day)||[];
-  if(entries.length){
-   const ul=document.createElement('ul');
-   for(const entry of entries){const li=document.createElement('li');li.textContent=entry;ul.appendChild(li)}
-   section.appendChild(ul);
-  }else{
-   const p=document.createElement('p');p.textContent=day===current?'No recorded decisions yet today.':'No saved events available for this day.';section.appendChild(p);
-  }
+ const last=Math.max(current,...byTurn.keys());
+ for(let n=1;n<=last;n++){
+  const section=document.createElement('details');section.className='af-v83-day';section.dataset.turn=String(n);
+  section.open=openTurns.has(n)||(host.children.length===0&&n===current);
+  const summary=document.createElement('summary');summary.textContent='TURN '+n+(n===current?' · CURRENT':' · HISTORY');section.appendChild(summary);
+  const entries=byTurn.get(n)||[];
+  if(entries.length){const ul=document.createElement('ul');for(const entry of entries){const li=document.createElement('li');li.textContent=entry;ul.appendChild(li)}section.appendChild(ul)}
+  else{const p=document.createElement('p');p.textContent=n===current?'No completed journal entry for this turn yet.':'No saved journal entry accessible for this turn.';section.appendChild(p)}
   fragment.appendChild(section);
  }
+ if(afV85HistoryStatus){const note=document.createElement('p');note.className='af-small';note.textContent=afV85HistoryStatus;fragment.appendChild(note)}
  host.replaceChildren(fragment);
 }
+
+let afV85LastRenderKey='';
 function render(s){
- const writing=document.activeElement;
- const activeDraft=writing && writing.matches && writing.matches('#afLiveChoices textarea');
- const sameTurn=Boolean(activeDraft && s.turn && turn && Number(s.turn.turn_number)===Number(turn.turn_number) && s.turn.phase==='collecting' && !s.submitted_by_me && s.my_mode==='active');
- if(sameTurn) return; // Preserve textarea, selection, and scroll while typing.
  afV83DailyChronicle(s);
+ const renderKey=JSON.stringify([s.turn?.turn_number,s.turn?.phase,s.submitted_by_me,s.submitted,s.participants,s.my_mode,s.position?.label,s.position?.lat,s.position?.lon,afAIScene?.title,afAIScene?.narrative]);
+ if(renderKey===afV85LastRenderKey)return; // Never rebuild unchanged scene every 4 seconds.
+ const active=document.activeElement;
+ const editing=active&&active.matches&&active.matches('#afLiveChoices textarea, #choiceAnswer, input[type="text"], textarea');
+ if(editing&&s.turn?.turn_number===turn?.turn_number&&s.turn?.phase==='collecting'&&!s.submitted_by_me)return;
+ afV85LastRenderKey=renderKey;
+ const savedY=window.scrollY;
+ const savedFocus=active&&active.id;
+
  turn=s.turn;const pos=s.position;afLivePosition=pos||null;if(pos)mapPosition(pos);journal(s.events);$('onlineCount').textContent='· '+s.participants+' ROSTER PARTICIPANTS (INCLUDES NPCS)';
  $('afLiveChoices').replaceChildren();$('chapterBook').textContent='Live campaign chronicle is shown below. Your private actions are not shared with other survivors.';const st=s.survival||{};const stats=$('afV52Survival');
  if(pos?.travel_to){const travel=document.createElement('p');travel.className='af-free-label';travel.textContent='CURRENT ROUTE · '+pos.label+' · Destination: '+pos.travel_to; $('afLiveChoices').appendChild(travel)}if(stats){stats.textContent=st.health===undefined?'SURVIVAL · Waiting for Day 1':'SURVIVAL · Health '+st.health+' · Food '+st.food+' · Water '+st.water+' · Medicine '+st.medicine+' · Fatigue '+st.fatigue+' · Stress '+st.stress;}
@@ -2221,11 +2245,13 @@ function render(s){
  const decisionHeading=document.createElement('h3');decisionHeading.textContent='YOUR DECISION · '+(afAIScene?.question||afEpisode(turn)[0]);decisionHeading.style.letterSpacing='2px';$('afLiveChoices').appendChild(decisionHeading);
   if(s.my_mode!=='active'){msg('Your character is '+s.my_mode+'. Decisions are unavailable until Mikel assigns you Active.');const p=document.createElement('p');p.className='af-small';p.textContent='NPCs make automatic server-side decisions; inactive characters do not participate.';$('afLiveChoices').appendChild(p)}else if(s.submitted_by_me){msg('Decision submitted · '+s.submitted+' / '+s.participants+' survivors ready. Your decision stays private.');const p=document.createElement('p');p.className='af-small';p.textContent='Waiting for the remaining active players. If everyone has submitted, the next day begins automatically.';$('afLiveChoices').appendChild(p)}else{msg('LIVE · '+s.submitted+' / '+s.participants+' survivors ready. Select your decision.');choiceUI()}
  afAILoad(s);
+ if(savedFocus&&document.activeElement===document.body){const restored=document.getElementById(savedFocus);if(restored&&restored.focus)restored.focus({preventScroll:true})}
+ requestAnimationFrame(()=>window.scrollTo({top:savedY,behavior:'instant'}));
 }
 let busy=false;async function refresh(){if(busy||!c())return;busy=true;try{
  const {data:{user}}=await c().auth.getUser();if(!user){document.body.classList.remove('af-live-ready');userId=null;return}
  const {data,error}=await c().from('af_players').select('character_name,survey_complete').eq('user_id',user.id).maybeSingle();if(error||!data?.survey_complete){document.body.classList.remove('af-live-ready');return}
- userId=user.id;name=data.character_name;document.body.classList.add('af-live-ready');
+ userId=user.id;name=data.character_name;document.body.classList.add('af-live-ready');void afV85FetchHistory();
  try{let snapshot=await rpc('af_live_snapshot');
  if(name?.trim().toLowerCase()==='mikel'&&snapshot?.turn?.phase==='collecting'&&snapshot?.submitted_by_me){
   try {const result=await rpc('af_admin_reconcile_v69');if(result?.advanced)snapshot=await rpc('af_live_snapshot')}
