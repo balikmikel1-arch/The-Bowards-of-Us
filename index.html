@@ -1790,6 +1790,18 @@ const panel=document.createElement('section');panel.id='afLiveOriginal';panel.in
 const stats=document.createElement('p');stats.id='afV52Survival';stats.style.cssText='font-size:12px;color:#e1c89c;margin:9px 0 12px;letter-spacing:.03em';panel.insertBefore(stats,document.getElementById('afLiveChoices'));const story=document.querySelector('.story');story.insertBefore(panel,story.firstChild);
 let userId=null, name='', turn=null, chosen=null, pending=false, lastTurn=null, lastLocation='', mapOk=false, privateMap=null;
 let afSharedContext=null;
+// V86: submit Penn Station to the authoritative server turn queue, not an AI-only operation.
+async function afSubmitTravel(destination){
+ const targets={
+  'Penn Station, Manhattan, New York':{label:'Penn Station, Manhattan, New York',lat:40.7506,lon:-73.9935}
+ };
+ const target=targets[destination];
+ if(!target)throw new Error('This destination is not connected to the server travel whitelist yet: '+destination);
+ const client=window.afterfallSupabase;
+ if(!client)throw new Error('Supabase is not connected. Sign in and reload.');
+ const {error}=await client.rpc('af_live_submit',{p_action:{kind:'travel:penn_station',target}});
+ if(error)throw new Error(error.message);
+}
 const afTravelDestinations=["Penn Station, Manhattan, New York", "Grand Central Terminal, Manhattan, New York", "Port Authority Bus Terminal, Manhattan, New York", "Jamaica Station, Queens, New York", "Atlantic Terminal, Brooklyn, New York", "World Trade Center Station, Manhattan, New York", "Hicksville Station, Long Island, New York", "Freeport Station, Long Island, New York", "Coney Island-Stillwell Avenue, Brooklyn, New York", "St. George Terminal, Staten Island, New York", "Newark Penn Station, New Jersey"];
 let afLivePosition=null;
 
@@ -1864,16 +1876,16 @@ function afAIChoiceUI(){
      (/\bpenn\s+station\b/i.test(text)?afTravelDestinations[0]:null);
    if(destination && /\b(go|travel|head|move|walk|ride|take|reach|leave|meet|continue)\b/i.test(text)){
     pending=true;submit.disabled=true;
-    try{await afAICall({operation:'travel',destination,mode:window.afV80TravelMode||'walking'});msg('Travel submitted. Actual movement resolves on the server.');await refresh()}
-    catch(e){msg('Travel failed: '+e.message)}finally{pending=false}
+    try{await afSubmitTravel(destination);msg('Travel submitted. Actual movement resolves on the server.');await refresh()}
+    catch(e){msg('Travel failed: '+e.message);alert('Penn Station travel failed: '+e.message)}finally{pending=false}
     return;
    }
    const kind=/\b(rest|sleep|recover|hide|shelter|stay home)\b/i.test(text)?'rest':/\b(search|scavenge|loot|supplies|food|water|medicine|gather)\b/i.test(text)?'scavenge':'hold';
    option=afAIScene.options.find(o=>o.action_kind===kind)||afAIScene.options[0];
   }else if(String(chosen||'').startsWith('travel|')){
    const dest=chosen.slice(7);pending=true;submit.disabled=true;
-   try{await afAICall({operation:'travel',destination:dest,mode:window.afV80TravelMode||'walking'});msg('Travel submitted. Your actual position updates when the turn resolves.');await refresh()}
-   catch(e){msg('Travel failed: '+e.message)}finally{pending=false}
+   try{await afSubmitTravel(dest);msg('Travel submitted. Your actual position updates when the turn resolves.');await refresh()}
+   catch(e){msg('Travel failed: '+e.message);alert('Penn Station travel failed: '+e.message)}finally{pending=false}
    return;
   }else option=afAIScene.options.find(o=>o.id===chosen);
   if(!option)return;
@@ -2089,8 +2101,8 @@ function choiceUI(){
   if(!chosen)return;
   if(String(chosen).startsWith('travel|')){
    pending=true;submit.disabled=true;
-   try{await afAICall({operation:'travel',destination:chosen.slice(7),mode:window.afV80TravelMode||'walking'});msg('Travel submitted. Position updates after turn resolution.');await refresh()}
-   catch(e){msg('Travel failed: '+e.message)}finally{pending=false}
+   try{await afSubmitTravel(chosen.slice(7));msg('Travel submitted. Position updates after turn resolution.');await refresh()}
+   catch(e){msg('Travel failed: '+e.message);alert('Penn Station travel failed: '+e.message)}finally{pending=false}
    return;
   }
   if(tense&&afTenseState.step===0){afTenseState.first=['hold','scavenge','rest'].indexOf(chosen);afTenseState.step=1;chosen=null;choiceUI();return}
