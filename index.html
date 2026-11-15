@@ -1799,11 +1799,16 @@ async function afSubmitTravel(destination){
  if(!target)throw new Error('This destination is not connected to the server travel whitelist yet: '+destination);
  const client=window.afterfallSupabase;
  if(!client)throw new Error('Supabase is not connected. Sign in and reload.');
- const {error}=await client.rpc('af_live_submit',{p_action:{kind:'travel:penn_station',target}});
+ const {error}=await client.rpc('af_live_submit',{p_action:{kind:'travel:penn_station',target,mode:afTravelMode}});
  if(error)throw new Error(error.message);
 }
 const afTravelDestinations=["Penn Station, Manhattan, New York", "Grand Central Terminal, Manhattan, New York", "Port Authority Bus Terminal, Manhattan, New York", "Jamaica Station, Queens, New York", "Atlantic Terminal, Brooklyn, New York", "World Trade Center Station, Manhattan, New York", "Hicksville Station, Long Island, New York", "Freeport Station, Long Island, New York", "Coney Island-Stillwell Avenue, Brooklyn, New York", "St. George Terminal, Staten Island, New York", "Newark Penn Station, New Jersey"];
 let afLivePosition=null;
+let afTravelMode='car';
+const afTravelSpeeds={walk:4,bike:12,car:65};
+function afTravelEstimate(dest){const p=afLivePosition;const target=({'Penn Station, Manhattan, New York':{lat:40.7506,lon:-73.9935}})[dest];if(!p||!target)return 'Estimate unavailable';const km=111.2*Math.sqrt((target.lat-p.lat)**2+((target.lon-p.lon)*Math.cos(p.lat*Math.PI/180))**2);const roadKm=km*1.35;const mins=Math.max(5,Math.ceil(roadKm/afTravelSpeeds[afTravelMode]*60));const lo=Math.round(mins*.85),hi=Math.round(mins*1.5);return '~'+lo+'–'+hi+' min (simulation, not live traffic)';}
+function afTravelModePicker(el){const label=document.createElement('label');label.className='af-ai-choice';label.textContent='TRANSPORT METHOD';el.appendChild(label);const sel=document.createElement('select');sel.className='af-ai-choice';sel.style.cssText='display:block;width:100%;padding:10px;margin:8px 0;background:#17232a;color:white;border:1px solid #52616a;border-radius:6px';[['car','🚗 Drive (if vehicle available)'],['walk','🚶 Walk'],['bike','🚲 Bicycle (if owned or obtained)']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)});sel.value=afTravelMode;sel.onchange=()=>{afTravelMode=sel.value;el.querySelectorAll('[data-af-estimate]').forEach(b=>b.textContent=afTravelEstimate(b.dataset.afEstimate));};el.appendChild(sel);const note=document.createElement('p');note.className='af-ai-choice';note.style.fontSize='12px';note.textContent='Train: only after service and fare are confirmed. Bicycle: find, borrow or buy one through a story interaction; selecting bike does not grant ownership. No automatic ticket charges.';el.appendChild(note);}
+
 
 let afAIScene=null, afAIKey='', afAIBusy=false, afAIBeats=[], afAIDraft='';
 async function afAICall(payload){
@@ -1860,10 +1865,10 @@ function afAIChoiceUI(){
   const title=document.createElement('p');title.className='af-ai-choice af-travel-heading';
   title.textContent=onWay?'TRAVEL IN PROGRESS · Choose to continue or change route':
     isHub?'LEAVE THIS TRANSIT HUB · Choose your next destination':'TRAVEL · Choose a destination instead of staying here';
-  el.appendChild(title);
+  el.appendChild(title);afTravelModePicker(el);
   for(const dest of targets){
    const b=document.createElement('button');b.className='af-choice af-ai-choice af-travel-choice'+(chosen==='travel|'+dest?' active':'');
-   b.textContent=(onWay===dest?'Continue toward ':'Travel toward ')+dest;
+   b.textContent=(onWay===dest?'Continue toward ':'Travel toward ')+dest+' · '+afTravelEstimate(dest);b.dataset.afEstimate=dest;
    b.onclick=()=>{chosen='travel|'+dest;el.querySelectorAll('.af-travel-choice').forEach(x=>x.classList.remove('active'));b.classList.add('active');};el.appendChild(b);
   }
  }
@@ -2108,8 +2113,8 @@ function choiceUI(){
   const onWay=String(afLivePosition?.travel_to||'');
   const isHub=/Penn Station|Grand Central|Port Authority|Jamaica Station|Atlantic Terminal|World Trade Center Station|Hicksville Station|Freeport Station|Stillwell Avenue|St. George Terminal|Newark Penn Station/i.test(String(afLivePosition?.label||''));
   const destinations=onWay?[onWay,...afTravelDestinations.filter(x=>x!==onWay).slice(0,3)]:isHub?afTravelDestinations.filter(x=>x!==afLivePosition.label):n===1?[afTravelDestinations[0],afTravelDestinations[3]]:afTravelDestinations.slice(0,4);
-  const heading=document.createElement('p');heading.className='af-free-label';heading.textContent=isHub?'ONWARD TRAVEL · Leave this station':onWay?'CONTINUE OR CHANGE YOUR ROUTE':'TRAVEL TO ANOTHER LOCATION';el.appendChild(heading);
-  for(const dest of destinations){const b=document.createElement('button');b.className='af-choice'+(chosen==='travel|'+dest?' active':'');b.textContent=(dest===onWay?'Continue to ':'Travel to ')+dest;b.onclick=()=>{chosen='travel|'+dest;el.querySelectorAll('.af-choice').forEach(x=>x.classList.remove('active'));b.classList.add('active')};el.appendChild(b)}
+  const heading=document.createElement('p');heading.className='af-free-label';heading.textContent=isHub?'ONWARD TRAVEL · Leave this station':onWay?'CONTINUE OR CHANGE YOUR ROUTE':'TRAVEL TO ANOTHER LOCATION';el.appendChild(heading);afTravelModePicker(el);
+  for(const dest of destinations){const b=document.createElement('button');b.className='af-choice'+(chosen==='travel|'+dest?' active':'');b.textContent=(dest===onWay?'Continue to ':'Travel to ')+dest+' · '+afTravelEstimate(dest);b.dataset.afEstimate=dest;b.onclick=()=>{chosen='travel|'+dest;el.querySelectorAll('.af-choice').forEach(x=>x.classList.remove('active'));b.classList.add('active')};el.appendChild(b)}
  }
  const submit=document.createElement('button');submit.className='af-live-button';submit.textContent=tense&&afTenseState.step===0?'CONTINUE · SECONDS PASS':'LOCK IN DECISION · END DAY';submit.disabled=pending||(!freeMode&&!chosen);
  submit.onclick=async()=>{
